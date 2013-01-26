@@ -41,6 +41,7 @@ GEM
     rack-test (0.6.2)
       rack (>= 1.0)
     sass (3.2.5)
+    semver (1.0.1)
     sinatra (1.3.3)
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
@@ -74,6 +75,7 @@ DEPENDENCIES
   execjs
   hike!
   sass (~> 3.2.5)
+  semver
   sinatra
   sinatra-contrib
   sprockets!

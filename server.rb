@@ -13,6 +13,7 @@ require 'coffee-script'
 Compass.configuration do |compass|
 end
 
+
 class AssetBenderServer < Sinatra::Base
   enable :logging
 
