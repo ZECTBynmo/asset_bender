@@ -15,7 +15,7 @@ describe 'VersionUtils' do
     ]
   end
 
-  it 'should validate correct version strings' do
+  it 'should parse and validate a few different version strings' do
     versions = [
       'v3.4.5',
       'v13.12.11',
@@ -29,8 +29,42 @@ describe 'VersionUtils' do
       'static-1.120',
     ]
 
-    versions.each do |version|
-      VersionUtils::is_valid_version(version).should be_true
+    semvers = [
+      SemVer.new(3, 4, 5),
+      SemVer.new(13, 12, 11),
+      SemVer.new(0, 100, 0, 'beta2'),
+
+      SemVer.new(3, 4, 5, 'prerelease'),
+      SemVer.new(13, 12, 11),
+      SemVer.new(0, 100, 0),
+
+      SemVer.new(0, 3, 4),
+      SemVer.new(0, 1, 120),
+    ]
+
+    versions.zip(semvers).each do |(str, semver)|
+      VersionUtils::is_valid_version(str).should be_true
+      VersionUtils::parse_version(str).should eq(semver)
+    end
+  end
+
+  it 'should parse wildcard version strings' do
+    versions = [
+      '3.4.x',
+      '13.x.x',
+      '0.100.x-beta2',
+    ]
+
+    semvers = [
+      SemVerRange.new(3, 4, 'x'),
+      SemVerRange.new(13, 'x', 'x'),
+      SemVerRange.new(0, 100, 'x', 'beta2'),
+    ]
+
+    versions.zip(semvers).each do |(str, semver)|
+      parsed_semver = VersionUtils::parse_version(str)
+      parsed_semver.should eq(semver)
+      parsed_semver.is_wildcard.should be_true
     end
   end
 

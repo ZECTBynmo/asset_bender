@@ -3,13 +3,13 @@ require 'semver-tribe'
 module AssetBender
   module VersionUtils
     # Default format '1.2.3'
-    FORMAT = '%M.%m.%p-%s'
+    FORMAT = '%M.%m.%p%s'
 
     # URL version format 'v1.2.3'
     URL_OUTPUT_FORMAT = 'v%M.%m.%p%s'
 
     # Other acceptable/legacy formats: 'v1.2.3', 'static-1.2'
-    ALTERNATE_FORMATS = ['v%M.%m.%p-%s', 'static-%m.%p']
+    ALTERNATE_FORMATS = ['v%M.%m.%p%s', 'static-%m.%p']
 
     # All acceptable formats together
     ALL_FORMATS = [FORMAT] + ALTERNATE_FORMATS
@@ -19,6 +19,8 @@ module AssetBender
             semver = SemVer.parse version, format
             return semver unless semver.nil?
         end
+
+        nil
     end
 
     def self.is_valid_version(version)

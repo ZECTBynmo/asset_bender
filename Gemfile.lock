@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: git://github.com/timmfin/semver-tribe.git
-  revision: f144a816d20298b42a108a572bf96b62b09d993e
+  revision: 96b26c850759b6832c41aa836244487415abb817
   branch: master
   specs:
     semver-tribe (0.1.1)

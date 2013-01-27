@@ -1,0 +1,9 @@
+{
+    "name": "project1",
+    "description": "A text fixture project",
+    "version": "1.0.0",
+
+    "dependencies": {
+        "jquery": "1.7.x"
+    }
+}
