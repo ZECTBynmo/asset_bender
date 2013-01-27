@@ -16,6 +16,13 @@ GIT
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
 
+GIT
+  remote: git://github.com/timmfin/semver-tribe.git
+  revision: f144a816d20298b42a108a572bf96b62b09d993e
+  branch: master
+  specs:
+    semver-tribe (0.1.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -30,6 +37,7 @@ GEM
       fssm (>= 0.2.7)
       sass (~> 3.1)
     daemons (1.1.9)
+    diff-lcs (1.1.3)
     eventmachine (1.0.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
@@ -40,8 +48,15 @@ GEM
       rack
     rack-test (0.6.2)
       rack (>= 1.0)
+    rspec (2.12.0)
+      rspec-core (~> 2.12.0)
+      rspec-expectations (~> 2.12.0)
+      rspec-mocks (~> 2.12.0)
+    rspec-core (2.12.2)
+    rspec-expectations (2.12.1)
+      diff-lcs (~> 1.1.3)
+    rspec-mocks (2.12.1)
     sass (3.2.5)
-    semver (1.0.1)
     sinatra (1.3.3)
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
@@ -74,8 +89,9 @@ DEPENDENCIES
   compass (~> 0.12.2)
   execjs
   hike!
+  rspec
   sass (~> 3.2.5)
-  semver
+  semver-tribe!
   sinatra
   sinatra-contrib
   sprockets!
