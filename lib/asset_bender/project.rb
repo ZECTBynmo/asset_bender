@@ -1,16 +1,19 @@
 module AssetBender
   class Project
     include ConfUtils
+
     FILENAME = 'component.json'
 
-    attr_reader :name, :description, :dependency_map
+    attr_reader :name, :version, :recommended_version,
+                :description, :dependency_map
 
     def initialize(config)
       @config = config
 
       @name = config['name']
       @description = config['description']
-      @version = VersionUtils.parse_version config['version']
+      @version = AssetBender::Version.new config['version']
+      @recommended_version = AssetBender::Version.new config['recommended_version']
 
       @dependency_map = build_dependency_map_with_semvers config['dependencies']
     end
@@ -29,8 +32,7 @@ module AssetBender
       deps_with_semvers = {}
 
       (dep_config || {}).each_with_object(deps_with_semvers) do |(dep_name, ver_str), new_hash|
-        new_hash[dep_name] = VersionUtils.parse_version ver_str
-        print "\n", "semver:  #{new_hash[dep_name].inspect}", "\n\n"
+        new_hash[dep_name] = AssetBender::Version.new ver_str
       end
 
       deps_with_semvers

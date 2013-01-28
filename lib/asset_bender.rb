@@ -6,5 +6,6 @@ module AssetBender
   VERSION = "0.1.0"
 
   autoload :Project,      "asset_bender/project"
+  autoload :Version,      "asset_bender/version"
   # autoload :FetchUtils,        "asset_bender/fetch_utils"
 end

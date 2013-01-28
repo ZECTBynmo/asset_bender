@@ -12,11 +12,14 @@ describe 'an AssetBender project' do
     proj.name.should eq(component_json['name'])
     proj.description.should eq(component_json['description'])
 
+    proj.version.to_s.should eq(component_json['version'])
+    proj.recommended_version.to_s.should eq(component_json['recommended_version'])
+
     proj.dependency_names.should eq(component_json['dependencies'].keys)
 
-    proj.dependency_map.each do |dep, semver|
-      semver.should_not be_nil
-      semver.format(VersionUtils::FORMAT).to_s.should eq(component_json['dependencies'][dep])
+    proj.dependency_map.each do |dep, version|
+      version.should_not be_nil
+      version.format(AB::Version::FORMAT).to_s.should eq(component_json['dependencies'][dep])
     end
   end
 
