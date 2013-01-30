@@ -1,6 +1,8 @@
+require 'forwardable'
+
 module AssetBender
 
-  class Config < FlexibleConfig
+  class Config
 
     FILENAME = ".bender.yaml"
     PATH = "~/"
@@ -9,18 +11,32 @@ module AssetBender
     include LoggerUtils
     extend LoggerUtils
 
-    def self.base_filename
+    extend SingleForwardable
+
+    # Load the global config singleton that will be avialble as:
+    #
+    #    AssetBender::Config.get_whatever_setting
+    #
+    def self.instance
+      @@global_config ||= Config.load
+    end
+
+    # Delegate to the singleton methods, excluding []= to keep it read only (ish) for now
+    def_delegators :instance, :update!, :[], :method_missing, :to_hash
+
+    def self.filename
       File.expand_path File.join PATH, FILENAME
     end
 
     # Creates a new config object by loading the data at filename (json
     # or yaml). If the "extends" key exists in that data, it preloads
     # config with the file (or files) specified.
-    def self.load(filename = nil)
-      filename ||= base_filename
+    def self.load(filename_to_load = nil)
+      filename_to_load ||= filename
 
-      config_data = load_json_or_yaml_file filename
-      config = Config.new
+      logger.info "Loading config: #{filename_to_load}"
+      config_data = load_json_or_yaml_file filename_to_load
+      config ||= FlexibleConfig.new
 
       # Inherited config
       extended_config_files(config_data).each do |parent_config_file|
@@ -44,6 +60,9 @@ module AssetBender
       end 
     end
 
+    # Get's the data for a parent config. It first looks to see if the passed name
+    # is a registered base config. If it isn't found there, then it tries to load
+    # it off the filesystem
     def self.load_parent_config(name_or_file)
       logger.info "Loading base config: #{name_or_file}"
 
@@ -75,8 +94,23 @@ module AssetBender
       BASE_CONFIGS[name] = data || block
     end
 
+    # List the names of all the registered base configs
     def self.registered_base_configs
       BASE_CONFIGS.keys
+    end
+
+    # Singleton enforcers
+    
+    private_class_method :new, :allocate
+
+    # Raises a TypeError to prevent cloning.
+    def self.clone
+      raise TypeError, "can't clone instance of singleton #{self.class}"
+    end
+
+    # Raises a TypeError to prevent duping.
+    def self.dup
+      raise TypeError, "can't dup instance of singleton #{self.class}"
     end
 
     private

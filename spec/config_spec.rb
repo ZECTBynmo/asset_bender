@@ -20,7 +20,7 @@ end
 describe AB::Config do
 
   it 'should default to loading from the home directory' do
-    AB::Config.base_filename.should eq(File.expand_path "~/.bender.yaml")
+    AB::Config.filename.should eq(File.expand_path "~/.bender.yaml")
   end
 
   it 'should load from a yaml file' do
@@ -84,6 +84,17 @@ describe AB::Config do
     config.extends.should be_nil
     config.base_setting.should eq("some setting")
     config.another_base_setting.should eq("some other setting")
+  end
+
+  it 'should have a singleton global config' do
+    AB::Config.instance.mysetting.should eq("timmfin")
+    AB::Config.mysetting.should eq("timmfin")
+  end
+
+  it "can't be instantiated manually, duped, or cloned" do
+    AB::Config.new.should be_nil
+    expect { AB::Config.dup }.to raise_error
+    expect { AB::Config.clone }.to raise_error
   end
  
 end
