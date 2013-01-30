@@ -6,3 +6,7 @@ shared_setting: 10
 a_hash:
   of: 
     stuff: that is awesome
+
+a_shared_hash:
+  of: 
+    other_stuff: that is awesome    

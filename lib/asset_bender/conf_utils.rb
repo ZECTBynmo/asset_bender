@@ -21,7 +21,8 @@ module AssetBender
   end
 
 
-  # http://mjijackson.com/2010/02/flexible-ruby-config-objects
+  # Based off of http://mjijackson.com/2010/02/flexible-ruby-config-objects and tweaked
+  # to better deal with nested hashes (merging, export, etc)
   class FlexibleConfig
 
     def initialize(data={})
@@ -31,7 +32,7 @@ module AssetBender
 
     def update!(data)
       data.each do |key, value|
-        if self[key] && self[key].is_a?(Hash) && value.is_a?(Hash)
+        if self[key] && self[key].is_a?(FlexibleConfig) && value.is_a?(Hash)
           self[key].update! value
         else
           self[key] = value
@@ -45,7 +46,7 @@ module AssetBender
 
     def []=(key, value)
       if value.class == Hash
-        @data[key.to_sym] = Config.new(value)
+        @data[key.to_sym] = FlexibleConfig.new(value)
       else
         @data[key.to_sym] = value
       end
@@ -56,6 +57,17 @@ module AssetBender
         self[$1] = args.first
       else
         self[sym]
+      end
+    end
+
+    # Export as a hash (recusively converting FlexibleConfig objects to hashes)
+    def to_hash
+      @data.each_with_object({}) do |(key, value), output|
+        if value.is_a? FlexibleConfig
+          output[key] = value.to_hash
+        else
+          output[key] = value
+        end
       end
     end
 
