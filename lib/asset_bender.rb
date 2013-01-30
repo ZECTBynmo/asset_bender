@@ -8,4 +8,5 @@ module AssetBender
   autoload :Project,      "asset_bender/project"
   autoload :Version,      "asset_bender/version"
   # autoload :FetchUtils,        "asset_bender/fetch_utils"
+  autoload :Fetcher,           "asset_bender/fetcher"
 end
