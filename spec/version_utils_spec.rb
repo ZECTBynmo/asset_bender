@@ -1,6 +1,5 @@
 require "asset_bender_test"
 
-AB = AssetBender
 VersionUtils = AssetBender::VersionUtils
 
 describe 'VersionUtils' do

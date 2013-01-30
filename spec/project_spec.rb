@@ -1,8 +1,6 @@
 require 'asset_bender_test'
 require 'json'
 
-AB = AssetBender
-
 describe 'an AssetBender project' do
 
   it 'loads a component.json file from the project root' do

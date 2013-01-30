@@ -1,0 +1,3 @@
+extends: [test_base, test_base2]
+
+my_setting: funtown

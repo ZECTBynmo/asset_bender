@@ -50,6 +50,10 @@ module AssetBender
       end
     end
 
+    def is_special_build_string
+       @semver.nil?
+    end
+
     # Delegate the standard methods (minus to_s)
     def_delegators :@proxy, :inspect, :=~, :!~, :==, :===
 

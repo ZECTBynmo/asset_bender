@@ -1,6 +1,6 @@
 module AssetBender
   class Project
-    include ConfUtils
+    include ConfLoaderUtils
 
     FILENAME = 'component.json'
 
@@ -12,10 +12,19 @@ module AssetBender
 
       @name = config['name']
       @description = config['description']
+
       @version = AssetBender::Version.new config['version']
       @recommended_version = AssetBender::Version.new config['recommended_version']
 
       @dependency_map = build_dependency_map_with_semvers config['dependencies']
+    end
+
+    def version_to_build
+      if @version.is_wildcard
+        @version
+      else
+        raise "This project has a fixed version specified, so version_to_build doesn't make sense"
+      end
     end
 
     def self.load_from_file(path)
@@ -38,12 +47,5 @@ module AssetBender
       deps_with_semvers
     end
 
-  end
-
-  class ResolvedProect < Project
-
-    def initialize(config)
-    super
-    end
   end
 end

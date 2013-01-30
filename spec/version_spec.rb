@@ -1,7 +1,5 @@
 require "asset_bender_test"
 
-AB = AssetBender
-
 describe 'VersionUtils' do
   before(:each) do
     @project_names = [
