@@ -9,6 +9,9 @@ module AssetBender
       :domain => AssetBender::Config.domain 
     }
 
+    # Creates a new Fetcher instance, which is used to query your configured domain
+    # for version numbers, build artifacts, etc. It is a class instead of methods
+    # so you can share a  Fetcher object, and call fetch calls from it will be cached.
     def initialize(options)
       @options = DEFAULT_OPTIONS.merge options
 
@@ -47,6 +50,7 @@ module AssetBender
       "#{@domain}/#{project_name}/#{version_pointer}"
     end
 
+    # Helper for creating an asset URL
     def url_prefix_for_project_assets(project_name, build_version)
       "#{@domain}/#{project_name}/#{build_version}"
     end
@@ -56,20 +60,31 @@ module AssetBender
       subpath
     end
 
+    # The main way to create a URL to any asset served by asset bender
     def build_asset_url(project_name, build_version, url_subpath)
       prefix = url_prefix_for_project_assets(project_name, build_version)
       url_subpath = strip_leading_slash url_subpath
       "#{prefix}/#{url_subpath}"
     end
 
+    # Filename that represents the hash created for a build. It is used to
+    # compare during build time to see if the build in progress is any
+    # different from the last successful one
     def build_hash_filename
+      # TODO, move to AssetBender::Config
       "premunged-static-contents-hash.md5"
     end
 
+    # Filename that represent the denormalized dependencies created for a 
+    # project at build time. That means that it contains the exact version
+    # of each dependnecy that was used in the build.
     def denormalized_dependencies_filename
+      # TODO, move to AssetBender::Config
       "prebuilt_recursive_static_conf.json"
     end
 
+    # Makes a HTTP request to your configured domain to figure out the last successful
+    # build version for the passed project
     def fetch_last_successful_build(project, func_options = nil)
       func_options ||= {}
       url = url_for_build_pointer project.name, project.version_to_build, func_options
@@ -88,10 +103,15 @@ module AssetBender
       end
     end
 
+    # Makes a HTTP request to your configured domain to figure out the last successful
+    # production build version for the passed project
     def fetch_last_production_build(project)
       fetch_last_successful_build project, { :force_production => true }
     end
 
+    # Makes a HTTP request to your configured domain to grab the build hash 
+    # for last successful build of the passed project. (Which can be used to detect if
+    # a build has any new changes that need to be uploaded)
     def fetch_last_build_hash(project)
       last_build_version = fetch_last_successful_build(project)
       url = build_asset_url project_name, last_build_version, build_hash_filename
@@ -110,6 +130,8 @@ module AssetBender
       end
     end
 
+    # Makes a HTTP request to your configured domain to grab the denormalized dependencies
+    # for last successful build of the passed project.
     def fetch_last_builds_dependencies(project)
       last_build_version = fetch_last_successful_build(project)
       url = build_asset_url project_name, last_build_version, denormalized_dependencies_filename
@@ -129,6 +151,11 @@ module AssetBender
       end
     end
 
+    # Makes a HTTP request to your configured domain to grab the last successful build's
+    # component.json, denormalized deps, and info.txt.
+    #
+    # (They are needed to shove into the python/node build artifacts if the current static build
+    # has no changes and won't be uploaded)
     def fetch_last_build_infomation(project)
       last_build_version = fetch_last_successful_build(project)
 
