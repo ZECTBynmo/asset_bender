@@ -12,6 +12,7 @@ module AssetBender
     extend LoggerUtils
 
     extend SingleForwardable
+    extend CustomSingleton
 
     # Load the global config singleton that will be avialble as:
     #
@@ -21,8 +22,8 @@ module AssetBender
       @@global_config ||= Config.load
     end
 
-    # Delegate to the singleton methods, excluding []= to keep it read only (ish) for now
-    def_delegators :instance, :update!, :[], :method_missing, :to_hash
+    # Delegate to the singleton methods
+    def_delegators :instance, :update!, :[], :[]=, :method_missing, :to_hash
 
     def self.filename
       File.expand_path File.join PATH, FILENAME
@@ -32,10 +33,22 @@ module AssetBender
     # or yaml). If the "extends" key exists in that data, it preloads
     # config with the file (or files) specified.
     def self.load(filename_to_load = nil)
+
+      # Only autocreate the config file if we are using the default one
+      # (e.g. they didn't manually specify where the config file lives)
+      create_if_doesnt_exist = filename_to_load.nil?  
+
       filename_to_load ||= filename
 
       logger.info "Loading config: #{filename_to_load}"
-      config_data = load_json_or_yaml_file filename_to_load
+
+      begin
+        config_data = load_json_or_yaml_file filename_to_load
+      rescue Errno::ENOENT
+        logger.warning "Config file doesn't exist at: #{filename_to_load}. Creating one."
+        create_brand_new_config_file if create_if_doesnt_exist
+      end
+
       config ||= FlexibleConfig.new
 
       # Inherited config
@@ -99,23 +112,42 @@ module AssetBender
       BASE_CONFIGS.keys
     end
 
-    # Singleton enforcers
-    
-    private_class_method :new, :allocate
-
-    # Raises a TypeError to prevent cloning.
-    def self.clone
-      raise TypeError, "can't clone instance of singleton #{self.class}"
+    def self.set_brand_new_config_template(contents)
+      CONFIG_TEMPLATES.push contents
     end
 
-    # Raises a TypeError to prevent duping.
-    def self.dup
-      raise TypeError, "can't dup instance of singleton #{self.class}"
+    def self.create_brand_new_config_file
+      # Grab the last set template off the stack
+      template = CONFIG_TEMPLATES[-1] || BASE_TEMPLATE
+
+      logger.warn "Writing the brand new template isn't implemented yet"
+      print "\n", "template:  #{template}", "\n\n"
     end
+
 
     private
 
     BASE_CONFIGS = {}
+
+    CONFIG_TEMPLATES = []   # Stack of base templates provided by extensions
+    BASE_TEMPLATE = """# Empty bender config, required fields must be filled out!
+# Required
+# domain: domain.for.your.s3.bucket.com
+# cdn_domain: domain.for.your.cdn.com
+
+# Local projects you want the bender server to serve (can be
+# overridden with command line arguments). Basically this should
+# include all the projects you need to edit.
+local_projects:
+#  - ~/dev/src/bla
+#  - ~/dev/src/somewhere/else/foobar
+
+
+# Optional
+# port: 3333
+
+# Note, if you change this file you need to restart the bender server
+"""
 
   end
 

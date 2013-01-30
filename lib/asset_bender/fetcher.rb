@@ -5,7 +5,8 @@ module AssetBender
 
     DEFAULT_OPTIONS = {
       :cache => false,
-      :environment => :qa
+      :environment => AssetBender::Config.environment || :qa,
+      :domain => AssetBender::Config.domain 
     }
 
     def initialize(options)

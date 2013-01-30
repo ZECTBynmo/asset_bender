@@ -89,6 +89,9 @@ describe AB::Config do
   it 'should have a singleton global config' do
     AB::Config.instance.mysetting.should eq("timmfin")
     AB::Config.mysetting.should eq("timmfin")
+
+    AB::Config.instance.new_setting = { :test => "yes" }
+    AB::Config.new_setting.test.should eq("yes")
   end
 
   it "can't be instantiated manually, duped, or cloned" do

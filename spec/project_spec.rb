@@ -4,7 +4,7 @@ require 'json'
 describe 'an AssetBender project' do
 
   it 'loads a component.json file from the project root' do
-    proj = AB::Project.load_from_file fixture_path('project1')
+    proj = AB::LocalProject.load_from_file fixture_path('project1')
     component_json = JSON::parse File.read fixture_path('project1/component.json')
 
     proj.name.should eq(component_json['name'])
@@ -15,10 +15,16 @@ describe 'an AssetBender project' do
 
     proj.dependency_names.should eq(component_json['dependencies'].keys)
 
-    proj.dependency_map.each do |dep, version|
+    proj.dependencies_by_name.each do |dep, version|
       version.should_not be_nil
       version.format(AB::Version::FORMAT).to_s.should eq(component_json['dependencies'][dep])
     end
+  end
+
+  it "has an alias if the parent folder doesn't match the name in the component.json" do
+    proj = AB::LocalProject.load_from_file fixture_path('project2')
+    proj.name.should eq("project2_real_name")
+    proj.aliases.include? 'project2'
   end
 
 end
