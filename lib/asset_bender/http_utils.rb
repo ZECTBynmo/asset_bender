@@ -20,7 +20,6 @@ module AssetBender
         http.open_timeout = http.read_timeout = timeout
 
         request = Net::HTTP::Get.new(uri.request_uri)
-
         response = http.request(request)
 
         raise "Error response from #{url}: #{response.code}" if response.code != "200"
@@ -49,8 +48,7 @@ module AssetBender
           return result
 
         # All of the errors: http://tammersaleh.com/posts/rescuing-net-http-exceptions/
-        rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
-       Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => exception
+        rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => exception
           logger.warn("Fetching url (retry = #{retry_count}) #{exception}")
           retry_count += 1
         end

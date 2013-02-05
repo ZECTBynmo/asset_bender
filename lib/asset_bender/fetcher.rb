@@ -1,13 +1,30 @@
-require 'typhoeus'
+require 'json'
 
 module AssetBender
   class Fetcher
 
+    include HTTPUtils
+    include LoggerUtils
+    include ProcUtils
+
     DEFAULT_OPTIONS = {
       :cache => false,
-      :environment => AssetBender::Config.environment || :qa,
-      :domain => AssetBender::Config.domain 
+      :environment => :qa,
+      :domain => nil,
+
+      :build_hash_filename => "premunged-static-contents-hash.md5",
+      :denormalized_dependencies_filename => "denormalized-deps.json",
+      :info_filename => "info.txt",
     }
+
+    PULL_FROM_GLOBAL_CONFIG = [
+      :environment,
+      :domain,
+
+      :build_hash_filename,
+      :denormalized_dependencies_filename,
+      :info_filename,
+    ]
 
     # Creates a new Fetcher instance, which is used to query your configured domain
     # for version numbers, build artifacts, etc. It is a class instead of methods
@@ -71,16 +88,18 @@ module AssetBender
     # compare during build time to see if the build in progress is any
     # different from the last successful one
     def build_hash_filename
-      # TODO, move to AssetBender::Config
-      "premunged-static-contents-hash.md5"
+      call_if_proc_otherwise_self @options[:build_hash_filename]
     end
 
     # Filename that represent the denormalized dependencies created for a 
     # project at build time. That means that it contains the exact version
     # of each dependnecy that was used in the build.
     def denormalized_dependencies_filename
-      # TODO, move to AssetBender::Config
-      "prebuilt_recursive_static_conf.json"
+      call_if_proc_otherwise_self @options[:denormalized_dependencies_filename]
+    end
+
+    def info_filename
+      call_if_proc_otherwise_self @options[:info_filename]
     end
 
     # Makes a HTTP request to your configured domain to figure out the last successful
@@ -92,11 +111,12 @@ module AssetBender
       begin
         last_build = fetch_url_with_retries(url).strip
       rescue
+        logger.warn $!
         last_build = nil
       end
 
-      if latest_build.nil? || latest_build.empty?
-        logger.warn "Warning, can't fetch latest build for #{project_name} (version to build = #{version_to_build}). No latest link exists at: #{latest_build_url}"
+      if last_build.nil? || last_build.empty?
+        logger.warn "Warning, can't fetch latest build for #{project.name} (version to build = #{project.version_to_build}). No latest link exists at: #{url}"
         nil
       else
         last_build
@@ -114,16 +134,17 @@ module AssetBender
     # a build has any new changes that need to be uploaded)
     def fetch_last_build_hash(project)
       last_build_version = fetch_last_successful_build(project)
-      url = build_asset_url project_name, last_build_version, build_hash_filename
+      url = build_asset_url project.name, last_build_version, build_hash_filename
 
       begin
         result = fetch_url_with_retries(url).strip
       rescue
+        logger.warn $!
         result = nil
       end
 
       if result.nil? || result.empty?
-        logger.info "Couldn't fetch the build hash for #{project_name}. (Not too big of a deal)"
+        logger.info "Couldn't fetch the build hash for #{project.name}. (Not too big of a deal)"
         nil
       else
         result
@@ -131,51 +152,58 @@ module AssetBender
     end
 
     # Makes a HTTP request to your configured domain to grab the denormalized dependencies
-    # for last successful build of the passed project.
+    # for last successful build of the passed project. Retruns a dictionary of project name
+    # to verions (AssetBender::Version instances).
     def fetch_last_builds_dependencies(project)
       last_build_version = fetch_last_successful_build(project)
-      url = build_asset_url project_name, last_build_version, denormalized_dependencies_filename
+      url = build_asset_url project.name, last_build_version, denormalized_dependencies_filename
 
       begin
-        result = fetch_url_with_retries(url).strip
-        deps = JSON(json_string)['deps']
+        json_string = fetch_url_with_retries(url).strip
+        deps = JSON(json_string).each_with_object({}) do |(dep, version), obj|
+          obj[dep] = AssetBender::Version.new version
+        end
       rescue
-        result = deps = nil
+        logger.warn $!
+        json_string = deps = nil
       end
 
-      if result.nil? || deps.nil?
-        logger.warning "Warning, can't fetch latest built dependencies. No #{denormalized_dependencies_filename} exists at: #{url} (or it is invalid)"
+      if json_string.nil? || deps.nil?
+        logger.warn "Warning, can't fetch latest built dependencies. No #{denormalized_dependencies_filename} exists at: #{url} (or it is invalid)"
         nil
       else
-        result
+        deps
       end
     end
 
     # Makes a HTTP request to your configured domain to grab the last successful build's
-    # component.json, denormalized deps, and info.txt.
+    # component.json, denormalized deps, and info.txt (all as strings).
     #
     # (They are needed to shove into the python/node build artifacts if the current static build
     # has no changes and won't be uploaded)
     def fetch_last_build_infomation(project)
       last_build_version = fetch_last_successful_build(project)
 
-      config_url =             build_asset_url project_name, last_build_version, "component.json"
-      denormalized_deps_url =  build_asset_url project_name, last_build_version, denormalized_dependencies_filename
-      info_url =               build_asset_url project.name, last_build_version, "info.txt"
+      config_url =             build_asset_url project.name, last_build_version, "component.json"
+      denormalized_deps_url =  build_asset_url project.name, last_build_version, denormalized_dependencies_filename
+      info_url =               build_asset_url project.name, last_build_version, info_filename
 
       begin
         config_result = fetch_url_with_retries(config_url)
         denormalized_deps_result = fetch_url_with_retries(denormalized_deps_url)
         info_result = fetch_url_with_retries(info_url)
-      rescue; end
+      rescue
+        logger.warn $!
+      end
 
       if config_result.nil? or config_result.empty? or denormalized_deps_result.nil? or denormalized_deps_result.empty?
-        logger.warning "Couldn't fetch current the last build information for #{project_name} (via #{static_conf_url} and #{prebuilt_conf_url})."
+        logger.warning "Couldn't fetch current the last build information for #{project.name} (via #{static_conf_url} and #{prebuilt_conf_url})."
         nil
       else
         [config_result, denormalized_deps_result, info_result]
       end
     end
+
 
   end
 end

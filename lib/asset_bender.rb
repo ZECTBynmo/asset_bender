@@ -3,6 +3,8 @@ require "custom_singleton"
 require "asset_bender/version_utils"
 require "asset_bender/conf_utils"
 require "asset_bender/logger_utils"
+require "asset_bender/http_utils"
+require "asset_bender/proc_utils"
 
 
 module AssetBender
