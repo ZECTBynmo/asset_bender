@@ -13,17 +13,23 @@ module AssetBender
     #    AssetBender::State.get_whatever_setting
     #
     def self.instance
-      raise "AssetBender::State has not been setup yet" unless @global_state
+      raise "AssetBender::State has not been setup yet" unless @@global_state
       @@global_state
     end
 
     # Called to setup the State singleton
     def self.setup(*args)
-      @@global_state = State.new(*args)
+      @@global_state = self.send :new, *args
     end
 
 
-    def initialize(projects, local_archive)
+    def initialize(project_paths, local_archive)
+      projects = project_paths.map do |project_path|
+        LocalProject.load_from_file File.expand_path project_path
+      end
+
+      @served_projects_by_name = {}
+
       projects.each do |project|
         names_and_aliases = [project.name] + project.aliases.to_a
         add_multiple_keys_to_hash @served_projects_by_name, names_and_aliases, project
@@ -39,9 +45,19 @@ module AssetBender
       @global_fetcher = AssetBender::Fetcher.new 
     end
 
+    # Delegate class methods to singleton insance
+    def self.method_missing(sym, *args)
+      instance.send sym, *args
+    end
+
     # Returns a list of all the projects that are locally being served
     def available_projects
-      @served_projects.values
+      @served_projects_by_name.values
+    end
+
+    # Returns a list of all the names of projects that are locally being served
+    def available_project_names
+      @served_projects_by_name.keys
     end
 
     # Returns a set of all the dependencies that are in the archive
@@ -62,17 +78,19 @@ module AssetBender
     # Returns the project instance from the passed name (or alias)
     # Fails and raises an error if the project doesn't exist
     def get_project(project_name)
-      raise "The #{project_name} project doesn't exists" unless project_exists?
+      raise "The #{project_name} project doesn't exists" unless project_exists? project_name
       @served_projects_by_name[project_name]
     end
 
-    # Returns the project or dependency instance from the passed name (or alias)
-    # Fails and raises an error if it doesn't exist
-    def get_project(project_name)
-      raise "The #{project_name} project doesn't exists" unless project_exists?
-      @served_projects_by_name[project_name]
+    # Returns the project instance that represents the passed in path, by
+    # looking for a "/<project_name>/" that matches one of the currently
+    # available projects.
+    #
+    # Returns nil if no project is found
+    def get_project_from_path(url_or_path)
+      name = VersionUtils::look_for_strings_in_path url_or_path, available_project_names
+      get_project name
     end
-
 
     # Helpers
 
