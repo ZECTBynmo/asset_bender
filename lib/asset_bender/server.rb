@@ -11,6 +11,7 @@ require 'coffee-script'
 
 require 'asset_bender'
 require 'asset_bender/server/directory_index'
+require 'asset_bender/server/project_index'
 
 Compass.configuration do |compass|
 
@@ -18,7 +19,6 @@ end
 
 module AssetBender
   class ABServer < Sinatra::Base
-    include Server::DirectoryIndexGenerator
 
     enable :logging
     set :sprockets, Sprockets::Environment.new(root, { :must_include_parent => true })
@@ -40,7 +40,8 @@ module AssetBender
     # end
 
     get '/' do
-      'Hello world!'
+      index_generator = Server::ProjectIndexGenerator.new
+      index_generator.list_of_projects_and_deps
     end
 
     get '/bundle-?:verb?/:path' do
@@ -49,11 +50,11 @@ module AssetBender
     end
 
     get '/*/' do
-      print "\n", "directory index"
       path = Rack::Utils.unescape(env['PATH_INFO'])
 
       project = State.get_project_from_path path
-      list_of_files_for_directory project.parent_path, path
+      index_generator = Server::DirectoryIndexGenerator.new project.parent_path, path
+      index_generator.list_of_files_for_directory 
     end
 
     # Fall through to sprockets

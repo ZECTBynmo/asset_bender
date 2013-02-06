@@ -4,7 +4,10 @@ require 'rack/mime'
 
 module AssetBender
   module Server
-    module DirectoryIndexGenerator
+
+    # Helper class used to render the directory indexes when browsing the
+    # folder structure of a project
+    class DirectoryIndexGenerator
 
       DIR_FILE = "<tr><td class='name'><a href='%s'>%s</a></td><td class='size'>%s</td><td class='type'>%s</td><td class='mtime'>%s</td></tr>"
       DIR_PAGE = <<-PAGE
@@ -36,10 +39,12 @@ table { width:100%%; }
 
       F = ::File
 
-      def list_of_files_for_directory(root_path, inner_path)
+      def initialize(root_path, inner_path)
         @root_path = root_path
         @path = File.join root_path, inner_path
+      end
 
+      def list_of_files_for_directory()
         if forbidden = check_forbidden
           forbidden
         else
