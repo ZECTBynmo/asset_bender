@@ -29,13 +29,20 @@ module AssetBender
     # Creates a new Fetcher instance, which is used to query your configured domain
     # for version numbers, build artifacts, etc. It is a class instead of methods
     # so you can share a  Fetcher object, and call fetch calls from it will be cached.
-    def initialize(options)
+    def initialize(options = nil)
+      options ||= {}
       @options = DEFAULT_OPTIONS.merge options
 
-      @has_cache = options[:cache]
+      PULL_FROM_GLOBAL_CONFIG.each do |setting|
+        @options[setting] = Config[setting] unless Config[setting].nil?
+      end
+
+      print "\n", "options:  #{options.inspect}", "\n\n"
+
+      @has_cache = @options[:cache]
 
       # Normalize the base domain
-      @domain = options[:domain]
+      @domain = @options[:domain]
       @is_from_filesystem = @domain.start_with? "file://"
       @domain = "http://#{@domain}" if not @is_from_filesystem && @domain =~ /^https?:\/\//
 
