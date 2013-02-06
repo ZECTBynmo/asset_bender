@@ -1,6 +1,15 @@
 
 module AssetBender
   module VersionUtils
+    def self.look_for_strings_in_path(url_or_path, potential_strings=nil)
+        return unless url_or_path
+        raise "No potential strings were passed." if potential_strings.nil?
+
+        tokens = url_or_path.split('/').compact
+        index = tokens.rindex { |token| potential_strings.include? token }
+        
+        tokens[index] if index && index > 0
+    end
     def self.project_replacement_regex(project_name)
         project_name_escaped = Regexp.escape(project_name)
         Regexp.new "#{project_name_escaped}\/(static|version|[\\w-]+)/", Regexp::MULTILINE

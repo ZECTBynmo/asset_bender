@@ -86,4 +86,32 @@ describe 'VersionUtils' do
     VersionUtils::replace_all_projects_versions_in(source, versions_by_project)
   end
 
+  context 'when extracting strings from paths' do
+    names = ['project1', 'another_proj', 'b3st.thing-ev4r']
+
+    it 'should find the string in a subpath' do
+      VersionUtils::look_for_strings_in_path("some/path/project1/version/lib.js", names).should eq("project1")
+    end
+
+    it 'should find the string in a full path' do
+      VersionUtils::look_for_strings_in_path("/some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
+    end
+
+    it 'should find the string in a file:// path' do
+      VersionUtils::look_for_strings_in_path("file://some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
+    end
+
+    it 'should find the string in a http:// path' do
+      VersionUtils::look_for_strings_in_path("http://some/path/b3st.thing-ev4r/v1.3.4/sass/styles.css", names).should eq("b3st.thing-ev4r")
+    end
+
+    it 'should return nil if none of the strings are found' do
+      VersionUtils::look_for_strings_in_path("/some/path/non-project/version/lib.js", names).should be_nil
+    end
+
+    it 'should only find the last (rightmost) match' do
+      VersionUtils::look_for_strings_in_path("/some/project1/path/another_proj/version/lib.js", names).should eq("another_proj")
+    end
+  end
+
 end
