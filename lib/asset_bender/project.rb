@@ -39,7 +39,7 @@ module AssetBender
     private
 
     def self.project_config_path(path)
-      File.join path, FILENAME
+      File.expand_path File.join path, FILENAME
     end
 
     def build_dependencies_by_name_with_semvers(dep_config)

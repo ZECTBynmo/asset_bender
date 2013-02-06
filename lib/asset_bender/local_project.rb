@@ -40,11 +40,27 @@ module AssetBender
       end
     end
 
+    def parent_path
+      File.split(@path)[0]
+    end
+
     def self.load_from_file(path)
       config_file = self.project_config_path(path)
       logger.info "Loading local project from file: #{config_file}"
 
-      self.new load_json_or_yaml_file(config_file), path
+      begin
+        project_config = load_json_or_yaml_file(config_file)
+      rescue
+        logger.error "Couldn't load #{config_file}, allowing for now..."
+        project_config = {
+          "name" => File.basename(path),
+          "version" => "0.1.x",
+          "recommended_version" => "0.1.x",
+        }
+        print "\n", "faked project_config:  #{project_config.inspect}", "\n\n"
+      end
+
+      self.new project_config, path
     end
   end
 end
