@@ -1,5 +1,6 @@
-require './server'
+$: << './lib'
+require 'asset_bender/server'
 
 map '/' do
-    run AssetBenderServer
+    run AssetBender::ABServer
 end
