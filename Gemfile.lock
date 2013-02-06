@@ -26,6 +26,7 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    addressable (2.3.2)
     backports (2.7.1)
     chunky_png (1.2.7)
     coffee-script (2.2.0)
@@ -36,12 +37,18 @@ GEM
       chunky_png (~> 1.2)
       fssm (>= 0.2.7)
       sass (~> 3.1)
+    crack (0.3.2)
     daemons (1.1.9)
     diff-lcs (1.1.3)
+    ethon (0.5.7)
+      ffi (~> 1.2.0)
+      mime-types (~> 1.18)
     eventmachine (1.0.0)
     execjs (1.4.0)
       multi_json (~> 1.0)
+    ffi (1.2.1)
     fssm (0.2.9)
+    mime-types (1.19)
     multi_json (1.5.0)
     rack (1.5.0)
     rack-protection (1.3.2)
@@ -57,6 +64,10 @@ GEM
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.12.1)
     sass (3.2.5)
+    simplecov (0.7.1)
+      multi_json (~> 1.0)
+      simplecov-html (~> 0.7.1)
+    simplecov-html (0.7.1)
     sinatra (1.3.3)
       rack (~> 1.3, >= 1.3.6)
       rack-protection (~> 1.2)
@@ -79,6 +90,9 @@ GEM
     uglifier (1.3.0)
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
+    webmock (1.9.0)
+      addressable (>= 2.2.7)
+      crack (>= 0.1.7)
 
 PLATFORMS
   ruby
@@ -92,9 +106,11 @@ DEPENDENCIES
   rspec
   sass (~> 3.2.5)
   semver-tribe!
+  simplecov
   sinatra
   sinatra-contrib
   sprockets!
   sprockets-sass
   thin
   uglifier (>= 1.2)
+  webmock

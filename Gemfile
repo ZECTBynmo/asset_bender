@@ -19,6 +19,11 @@ gem 'sprockets-sass'
 
 gem 'semver-tribe', :github => 'timmfin/semver-tribe', :branch => 'master'
 
-group :development, :test do
+group :development do
+end
+
+group :test do
     gem 'rspec'
+    gem 'simplecov'
+    gem 'webmock'
 end
