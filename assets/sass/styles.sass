@@ -1,0 +1,85 @@
+//= require ./normalize
+//= require ../ChunkFive/stylesheet
+
+@import compass
+
+// MIXINS
+
+=fancy-font
+    font-family: ChunkFiveRegular
+
+
+// BASE
+
+a
+    text-decoration: none
+
+    &:hover
+        text-decoration: underline
+
+body
+    max-width: 50em
+    margin: 0 auto
+    padding: 0 1em
+
+    color: #666
+
+
+    > header
+        h1
+            +fancy-font
+            color: #444
+
+    > footer
+        margin-top: 3em
+        text-align: right
+        font-style: italic
+        font-size: .75em
+        color: #ccc
+
+// PROJECT INDEX STYLES
+
+.project
+    margin-bottom: 1em
+
+    header > a
+
+        .name
+            +fancy-font
+            display: inline
+
+            font-size: 1.5em
+            font-weight: 500
+
+        .path
+            margin-left: .75em
+            color: #aaa
+
+        &:hover
+            text-decoration: none
+
+            .name
+                text-decoration: underline
+
+    dl
+        +clearfix
+        color: #888
+
+        dt, dd
+            margin: 0
+            float: left
+
+        dt
+            clear: left
+            margin-right: 1em
+
+    > dl
+        font-size: .8em
+
+        dt
+            text-transform: uppercase
+
+            &:after
+                content: ':'
+
+

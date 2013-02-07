@@ -3,6 +3,7 @@ source :rubygems
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'thin'
+gem 'slim'
 
 gem 'execjs'
 gem 'sass', "~> 3.2.5"

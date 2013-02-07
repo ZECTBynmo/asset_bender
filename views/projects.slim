@@ -1,0 +1,23 @@
+header
+  h1 Asset Bender: Projects
+
+- for project in projects do
+    section.project
+      header
+        a href="/#{project.name}/"
+          h1.name = project.name
+          span.path = project.pretty_path
+
+      dl
+        - unless project.dependencies_by_name.empty?
+          dt.deps Dependencies
+          dd.deps
+            dl
+            - for dep, version in project.dependencies_by_name
+                dt.name = dep
+                dd.version = version
+
+
+
+        dt.mtime Last Modified
+        dd.mtime = project.last_modified
