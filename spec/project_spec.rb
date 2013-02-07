@@ -24,7 +24,7 @@ describe 'an AssetBender project' do
   it "has an alias if the parent folder doesn't match the name in the component.json" do
     proj = AB::LocalProject.load_from_file fixture_path('project2')
     proj.name.should eq("project2_real_name")
-    proj.aliases.include? 'project2'
+    proj.alias.should eq('project2')
   end
 
 end

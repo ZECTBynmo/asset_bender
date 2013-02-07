@@ -1,3 +1,6 @@
+require 'etc'
+
+CurrentUser = Etc.getlogin
 
 module AssetBender
   class LocalProject < Project
@@ -26,7 +29,7 @@ module AssetBender
 
     def check_for_alias
       parent_directory = File.basename @path
-      @aliases.add parent_directory if parent_directory != @name
+      @alias = parent_directory if parent_directory != @name
     end
 
     def has_specs?
@@ -38,6 +41,16 @@ module AssetBender
         potential_spec_dir = File.join @path, dir
         return @spec_dir = potential_spec_dir if File.directory? potential_spec_dir
       end
+    end
+
+    def last_modified
+      stat = File.stat @path
+      stat.mtime
+    end
+
+    def pretty_path
+      output = @path
+      output.sub /\/(Users|home)\/#{CurrentUser}\//i, '~/'
     end
 
     def parent_path

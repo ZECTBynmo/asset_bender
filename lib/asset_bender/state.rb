@@ -31,7 +31,9 @@ module AssetBender
       @served_projects_by_name = {}
 
       projects.each do |project|
-        names_and_aliases = [project.name] + project.aliases.to_a
+        names_and_aliases = [project.name]
+        names_and_aliases << project.alias if project.alias
+
         add_multiple_keys_to_hash @served_projects_by_name, names_and_aliases, project
 
         @jasmine_projects.add project if project.has_specs?
@@ -52,7 +54,7 @@ module AssetBender
 
     # Returns a list of all the projects that are locally being served
     def available_projects
-      @served_projects_by_name.values
+      Set.new(@served_projects_by_name.values).to_a
     end
 
     # Returns a list of all the names of projects that are locally being served

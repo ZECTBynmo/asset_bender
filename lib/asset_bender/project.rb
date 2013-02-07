@@ -8,21 +8,27 @@ module AssetBender
 
     FILENAME = 'component.json'
 
-    attr_reader :name, :aliases,
+    attr_reader :name, :alias,
                 :version, :recommended_version,
                 :description, :dependencies_by_name
 
     def initialize(config)
       @config = config
 
-      @name = config['name']
-      @description = config['description']
+      @name = @config['name']
+      @description = @config['description']
 
-      @version = AssetBender::Version.new config['version']
-      @recommended_version = AssetBender::Version.new config['recommended_version']
+      @version = AssetBender::Version.new @config['version']
+
+      if @config['recommended_version']
+        @recommended_version = AssetBender::Version.new @config['recommended_version']
+      else
+        logger.warn "No recommended version specified for #{@name}, assuming it is the same as the current version."
+        @recommended_version = @version.dup
+      end
 
       @dependencies_by_name = build_dependencies_by_name_with_semvers config['dependencies']
-      @aliases = Set.new
+      @alias = nil
     end
 
     def self.load_from_file(path)
