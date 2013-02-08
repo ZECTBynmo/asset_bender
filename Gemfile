@@ -5,6 +5,9 @@ gem 'sinatra-contrib'
 gem 'thin'
 gem 'slim'
 
+gem 'actionpack'
+gem 'git'
+
 gem 'execjs'
 gem 'sass', "~> 3.2.5"
 gem 'compass', "~> 0.12.2"

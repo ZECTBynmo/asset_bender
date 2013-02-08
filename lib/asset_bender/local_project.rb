@@ -1,5 +1,11 @@
 require 'etc'
 
+# Fix issue with Psync vs syck in yaml files from the i18n gem
+YAML::ENGINE.yamler= 'syck'
+
+require 'action_view'
+require 'git'
+
 CurrentUser = Etc.getlogin
 
 module AssetBender
@@ -10,6 +16,8 @@ module AssetBender
       'static/test/spec',
       'spec'
     ]
+
+    include ActionView::Helpers::DateHelper
 
     def initialize(config, path_to_project)
       super config
@@ -46,6 +54,51 @@ module AssetBender
     def last_modified
       stat = File.stat @path
       stat.mtime
+    end
+
+    def last_modified_ago
+      distance_of_time_in_words_to_now(last_modified) + " ago"
+    end
+
+    def git
+      return if @_git == false
+
+      begin
+        @_git ||= Git.open @path
+      rescue
+        logger.warn '#{@path} is not a git repo'
+        @_git = false
+      end
+    end
+
+    def outstanding_commits(remote_branch = nil)
+      remote_branch ||= git.remote.branch
+      git.log.between(remote_branch, 'HEAD').count
+    end
+
+    def incoming_commits(remote_branch = nil)
+      remote_branch ||= git.remote.branch
+      git.log.between('HEAD', remote_branch).count
+    end
+
+    def repo_info
+      return unless git
+
+      remote_branch = git.remote.branch
+      outstanding = outstanding_commits remote_branch
+      incoming = incoming_commits remote_branch
+
+      outstanding_str = incoming_str = nil
+      outstanding_str = "<span class=outstanding>+#{outstanding}</span>"if outstanding > 0
+      incoming_str = "<span class=incoming>+#{incoming}</span>" if incoming > 0
+
+      if outstanding_str || incoming_str
+        result = "#{[outstanding_str, incoming_str].compact.join ' and '} commits from "
+      else
+        result = "up to date with "
+      end
+
+      result += "<span class=remote-branch>#{remote_branch}</span>"
     end
 
     def pretty_path

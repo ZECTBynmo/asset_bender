@@ -1,12 +1,28 @@
 //= require ./normalize
 //= require ../ChunkFive/stylesheet
+//= require ../Edelsans/stylesheet
 
 @import compass
 
+
+// COLORS
+
+$lightYellow: #f9fcc6
+
+$orange: #f29826
+$darkOrangeRed: #df7524
+
+$green: #719954
+$darkGreen: #5d8741
+
+
 // MIXINS
 
-=fancy-font
+=heading-font
     font-family: ChunkFiveRegular
+
+=body-font
+    font-family: edelsansregular
 
 
 // BASE
@@ -17,18 +33,16 @@ a
     &:hover
         text-decoration: underline
 
-body
-    max-width: 50em
-    margin: 0 auto
-    padding: 0 1em
-
+body 
     color: #666
-
+    +body-font
 
     > header
         h1
-            +fancy-font
             color: #444
+    > .content
+        max-width: 50em
+        margin: 0 auto
 
     > footer
         margin-top: 3em
@@ -37,7 +51,20 @@ body
         font-size: .75em
         color: #ccc
 
+
 // PROJECT INDEX STYLES
+
+.projects
+    header
+        h1
+            +heading-font
+            font-size: 36px
+            display: inline
+
+        .desc
+            font-size: 17px
+            display: inline
+            margin-left: 1em
 
 .project
     margin-bottom: 1em
@@ -45,7 +72,6 @@ body
     header > a
 
         .name
-            +fancy-font
             display: inline
 
             font-size: 1.5em

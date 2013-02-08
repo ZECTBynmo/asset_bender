@@ -1,23 +1,25 @@
-header
-  h1 Asset Bender: Projects
+section.projects
+  header
+    h1 Projects
+    .desc all of the local projects currently configured
 
-- for project in projects do
-    section.project
-      header
-        a href="/#{project.name}/"
-          h1.name = project.name
-          span.path = project.pretty_path
+  - for project in projects do
+      div.project
+        header
+          a href="/#{project.name}/"
+            h2.name = project.name
+            span.path
 
-      dl
         - unless project.dependencies_by_name.empty?
-          dt.deps Dependencies
-          dd.deps
-            dl
+          dl.deps
             - for dep, version in project.dependencies_by_name
                 dt.name = dep
                 dd.version = version
 
+        .path = project.pretty_path
+
+        .meta
+          .repoinfo == project.repo_info
+          .mtime = "last modified #{project.last_modified_ago}"
 
 
-        dt.mtime Last Modified
-        dd.mtime = project.last_modified
