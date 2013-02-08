@@ -18,10 +18,10 @@ $darkGreen: #5d8741
 
 // MIXINS
 
-=heading-font
+=heading-font-family
     font-family: ChunkFiveRegular
 
-=body-font
+=body-font-family
     font-family: edelsansregular
 
 
@@ -33,9 +33,12 @@ a
     &:hover
         text-decoration: underline
 
+html
+    font-size: 100%   // 1em == 16px
+
 body 
     color: #666
-    +body-font
+    +body-font-family
 
     > header
         h1
@@ -57,12 +60,11 @@ body
 .projects
     header
         h1
-            +heading-font
-            font-size: 36px
+            +heading-font-family
+            font-size: 2.25em
             display: inline
 
         .desc
-            font-size: 17px
             display: inline
             margin-left: 1em
 
@@ -74,7 +76,7 @@ body
         .name
             display: inline
 
-            font-size: 1.5em
+            font-size: 1.75em
             font-weight: 500
 
         .path
@@ -100,11 +102,7 @@ body
             margin-right: 1em
 
     > dl
-        font-size: .8em
-
         dt
-            text-transform: uppercase
-
             &:after
                 content: ':'
 

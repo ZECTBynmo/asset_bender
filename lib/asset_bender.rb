@@ -1,3 +1,6 @@
+# Early monkeypatches
+require "asset_bender/patches/transform_hash_keys_to_symbols"
+
 require "custom_singleton"
 
 require "asset_bender/version_utils"
@@ -11,6 +14,8 @@ module AssetBender
   VERSION = "0.1.0"
 
   extend LoggerUtils
+
+  class Error < StandardError; end
 
   autoload :Project,           "asset_bender/project"
   autoload :LocalProject,      "asset_bender/local_project"

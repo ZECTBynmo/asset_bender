@@ -4,6 +4,7 @@ module AssetBender
 
   class State
     include CustomSingleton
+    include LoggerUtils
 
     attr_reader :served_projects_by_name,  # Also by alias if there is one
                 :jasmine_projects
@@ -25,8 +26,13 @@ module AssetBender
 
     def initialize(project_paths, local_archive)
       projects = project_paths.map do |project_path|
-        LocalProject.load_from_file File.expand_path project_path
-      end
+        begin
+          LocalProject.load_from_file File.expand_path project_path
+        rescue AssetBender::ProjectLoadError => e
+          logger.error e
+          nil
+        end
+      end.compact
 
       @served_projects_by_name = {}
 

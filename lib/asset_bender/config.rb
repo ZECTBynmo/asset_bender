@@ -7,7 +7,7 @@ module AssetBender
     FILENAME = ".bender.yaml"
     PATH = "~/"
 
-    include ConfLoaderUtils
+    extend ConfLoaderUtils
     include LoggerUtils
     extend LoggerUtils
 
@@ -64,7 +64,7 @@ module AssetBender
     # and returns an array—forcing a single string to single element
     # array and nil to an empty array.
     def self.extended_config_files(data)
-      extends = data.delete "extends"
+      extends = data.delete :extends
 
       case extends
         when String then [extends]

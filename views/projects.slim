@@ -14,7 +14,7 @@ section.projects
           dl.deps
             - for dep, version in project.dependencies_by_name
                 dt.name = dep
-                dd.version = version
+                dd.version = version.abbrev
 
         .path = project.pretty_path
 

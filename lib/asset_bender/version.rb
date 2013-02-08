@@ -50,6 +50,14 @@ module AssetBender
       end
     end
 
+    def abbrev
+      if @semver.nil?
+        @special.abbrev 
+      else
+        to_s
+      end
+    end
+
     def is_special_build_string
        @semver.nil?
     end
@@ -96,6 +104,10 @@ module AssetBender
       'current' => 'recommended'
     }
 
+    ABBREVIATIONS = {
+      'recommended' => 'rec.'
+    }
+
     def initialize(version_string)
       version_string = version_string.to_s
       @version_string = ALIASES[version_string] || version_string
@@ -103,6 +115,10 @@ module AssetBender
 
     def is_wildcard
       true
+    end
+
+    def abbrev
+      ABBREVIATIONS[@version_string] || @version_string
     end
 
     def format fmt = nil
