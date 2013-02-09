@@ -25,15 +25,17 @@ $darkGreen: #5d8741
     font-family: edelsansregular
 
 %container
-    min-width: 42rem
-    max-width: 50rem
-    margin: 0 auto
-    padding: 0 1.5rem
     position: relative
+    margin: 0 auto
+    min-width: 45rem
+    max-width: 55rem
+    padding: 0 1.5rem
 
 
 // BASE
 
+*
+    +box-sizing(border-box)
 a
     text-decoration: none
 
@@ -131,8 +133,30 @@ body
             clear: left
             margin-right: 1em
 
+            color: $darkGreen
+
             &:after
                 content: ':'
+
+        %dep-version
+            float: left
+
+        .requested
+            @extend %dep-version
+            width: 4em
+            padding-right: 1em
+            color: $orange
+
+        .resolved
+            @extend %dep-version
+            width: 5em
+            color: $green
+
+            &:before
+                content: '→'
+                display: inline-block
+                width: 2em
+
 
     %extra-info
         position: absolute
