@@ -11,15 +11,14 @@ require 'coffee-script'
 require 'slim'
 
 require 'asset_bender'
-require 'asset_bender/server/directory_index'
 
 Compass.configuration do |compass|
 
 end
 
-
 module AssetBender
-  class ABServer < Sinatra::Base
+  class Server < Sinatra::Base
+    require 'asset_bender/server/directory_index'
 
     project_root = File.join settings.root, '../../'
     enable :logging
@@ -72,7 +71,7 @@ module AssetBender
       project = project_from_url
       change_to_aliased_path_of project if path_matches_name_not_alias_from project
 
-      ABServer.sprockets.call(env)
+      Server.sprockets.call(env)
     end
 
     def get_path

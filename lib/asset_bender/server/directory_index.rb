@@ -3,7 +3,7 @@ require 'rack/utils'
 require 'rack/mime'
 
 module AssetBender
-  module Server
+  class Server
 
     # Helper class used to render the directory indexes when browsing the
     # folder structure of a project
