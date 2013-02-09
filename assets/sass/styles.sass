@@ -24,6 +24,13 @@ $darkGreen: #5d8741
 =body-font-family
     font-family: edelsansregular
 
+%container
+    min-width: 42rem
+    max-width: 50rem
+    margin: 0 auto
+    padding: 0 1.5rem
+    position: relative
+
 
 // BASE
 
@@ -43,11 +50,11 @@ body
     > header
         h1
             color: #444
+
     > .content
-        max-width: 50em
-        margin: 0 auto
 
     > footer
+        @extend %container
         margin-top: 3em
         text-align: right
         font-style: italic
@@ -58,7 +65,21 @@ body
 // PROJECT INDEX STYLES
 
 .projects
-    header
+    > header
+        margin-bottom: 1em
+    
+        .wrap
+            @extend %container
+            padding:
+                top: .75em * 1/2
+                bottom: .75em * 1/2
+
+        color: $lightYellow
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, .15)
+        background-color: $orange
+        border: none
+            bottom: solid 2px $darkOrangeRed
+
         h1
             +heading-font-family
             font-size: 2.25em
@@ -69,13 +90,16 @@ body
             margin-left: 1em
 
 .project
+    @extend %container
     margin-bottom: 1em
+    min-height: 5.5em
 
     header > a
 
         .name
             display: inline
 
+            color: $darkOrangeRed
             font-size: 1.75em
             font-weight: 500
 
@@ -89,21 +113,45 @@ body
             .name
                 text-decoration: underline
 
-    dl
+    dl.deps
         +clearfix
+        padding: 0
+            top: .5
+            left: 2em
+
         color: #888
+        line-height: 1.25em
 
         dt, dd
             margin: 0
             float: left
+            width: 10em
 
         dt
             clear: left
             margin-right: 1em
 
-    > dl
-        dt
             &:after
                 content: ':'
+
+    %extra-info
+        position: absolute
+        text-align: right
+        right: 1.5em
+        color: #b3b3b3
+
+    .path
+        @extend %extra-info
+        top: 0
+        font-size: 1.25em
+        line-height: 2em
+
+    .meta
+        @extend %extra-info
+        top: 3em
+        line-height: 1.25em
+
+        .outstanding, .incoming, .remote-branch, .time-delta-value
+            color: #4a4a4a
 
 
