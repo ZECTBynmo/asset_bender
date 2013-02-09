@@ -9,20 +9,21 @@ section.projects
         header
           a href="/#{project.name}/"
             h2.name = project.name
-            span.path
+            span.version = project.version
 
         - unless project.dependencies_by_name.empty?
           dl.deps
             - for dep, version in project.dependencies_by_name
-                dt.name = dep
+                dt.name
+                  a href="/#{dep}/" = dep
                 dd.version 
                   span.requested = version.abbrev
                   span.resolved = version.abbrev
 
-        .path = project.pretty_path
+        a.path href="/#{project.name}/" = project.pretty_path
 
         .meta
           .repoinfo == project.repo_info
-          .mtime = "last modified #{project.last_modified_ago}"
+          .mtime == "last modified #{project.last_modified_ago}"
 
 
