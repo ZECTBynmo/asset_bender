@@ -77,7 +77,15 @@ module AssetBender
         }
       end
 
-      files
+      files.sort do |x, y|
+        if x[:type] == 'directory' && y[:type] != 'directory'
+          -1
+        elsif x[:type] != 'directory' && y[:type] == 'directory'
+          1
+        else
+          x[:name] <=> y[:name]
+        end
+      end
     end
 
     def stat(node, max = 10)
