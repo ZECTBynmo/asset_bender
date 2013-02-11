@@ -23,4 +23,5 @@ module AssetBender
   autoload :Fetcher,           "asset_bender/fetcher"
   autoload :Config,            "asset_bender/config"
   autoload :State,             "asset_bender/state"
+  autoload :Directory,         "asset_bender/directory"
 end

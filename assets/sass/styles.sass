@@ -53,8 +53,6 @@ body
         h1
             color: #444
 
-    > .content
-
     > footer
         @extend %container
         margin-top: 3em
@@ -64,32 +62,52 @@ body
         color: #ccc
 
 
+// SHARED STYLES
+
+%base-header
+    margin-bottom: 1em
+
+    .wrap
+        @extend %container
+        padding:
+            top: .75em * 1/2
+            bottom: .75em * 1/2
+
+    color: $lightYellow
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .15)
+
+    a
+        color: $lightYellow
+
+    h1
+        +heading-font-family
+        font-size: 2.25em
+        display: inline
+
+    .desc
+        display: inline
+        margin-left: 1em
+
+%project-header
+    @extend %base-header
+
+    background-color: $orange
+    border: none
+        bottom: solid 2px $darkOrangeRed
+
+%dependency-header
+    @extend %base-header
+
+    background-color: $green
+    border: none
+        bottom: solid 2px $darkGreen
+
+
 // PROJECT INDEX STYLES
 
 .projects
     > header
-        margin-bottom: 1em
-    
-        .wrap
-            @extend %container
-            padding:
-                top: .75em * 1/2
-                bottom: .75em * 1/2
-
-        color: $lightYellow
-        text-shadow: 0 -1px 0 rgba(0, 0, 0, .15)
-        background-color: $orange
-        border: none
-            bottom: solid 2px $darkOrangeRed
-
-        h1
-            +heading-font-family
-            font-size: 2.25em
-            display: inline
-
-        .desc
-            display: inline
-            margin-left: 1em
+        @extend %project-header
 
 .project
     @extend %container
@@ -181,3 +199,36 @@ body
             color: #4a4a4a
 
 
+body > .directory
+    &.is-project > header
+        @extend %project-header
+
+        h1
+            font-size: 1.75em
+            font-weight: normal
+            letter-spacing: 1px
+
+        a 
+            margin-right: .25em
+
+            &:after
+                content: '/'
+
+            &:hover
+                text-decoration: none
+                border-bottom: 1px solid $lightYellow
+
+    &.is-depedency > header 
+        @extend %depedency-header
+
+    .dirs-n-files
+        @extend %container
+
+        table
+            width: 100%
+
+            .name
+                width: 50%
+
+            .mtime
+                text-align: right

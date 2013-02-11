@@ -1,0 +1,17 @@
+.directory class="#{directory.is_project ? 'is-project' : 'is_dependency'}"
+  header
+    .wrap
+      h1
+        a href="/" ..
+
+        - for part in directory.split_path do
+          a href="/#{part}/" = part
+
+  .dirs-n-files
+    table
+      - for item in directory.sub_directories_and_files do
+        tr
+          td class='name'
+            a href="#{item[:url]}" = item[:name]
+          td class='type' = item[:type]
+          td class='mtime' = item[:mtime]

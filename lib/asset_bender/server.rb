@@ -18,7 +18,6 @@ end
 
 module AssetBender
   class Server < Sinatra::Base
-    require 'asset_bender/server/directory_index'
 
     project_root = File.join settings.root, '../../'
     enable :logging
@@ -60,8 +59,15 @@ module AssetBender
       project = project_from_url
       change_to_aliased_path_of project if path_matches_name_not_alias_from project
 
-      index_generator = Server::DirectoryIndexGenerator.new project.parent_path, path
-      index_generator.list_of_files_for_directory 
+      directory = AssetBender::Directory.new get_path, project
+
+      if error = directory.check_forbidden or directory.check_directory_exists
+        error
+      else
+        slim :directory, :locals => {
+          :directory => directory
+        }
+      end
     end
 
     # Fall through to sprockets
