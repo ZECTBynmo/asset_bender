@@ -2,6 +2,8 @@ require 'net/http'
 require 'uri'
 
 module AssetBender
+  class FetchError < StandardError; end
+
   module HTTPUtils
 
     include LoggerUtils
@@ -22,7 +24,7 @@ module AssetBender
         request = Net::HTTP::Get.new(uri.request_uri)
         response = http.request(request)
 
-        raise "Error response from #{url}: #{response.code}" if response.code != "200"
+        raise AssetBender::FetchError.new "Error response from #{url}: #{response.code}" if response.code != "200"
 
         response.body
       end

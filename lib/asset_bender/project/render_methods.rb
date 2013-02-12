@@ -1,3 +1,4 @@
+require 'etc'
 
 # Fix issue with Psync vs syck in yaml files from the i18n gem
 YAML::ENGINE.yamler= 'syck'

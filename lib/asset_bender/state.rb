@@ -2,6 +2,8 @@ require 'set'
 
 module AssetBender
 
+  class UnknownProjectError < StandardError; end
+  
   class State
     include CustomSingleton
     include LoggerUtils
@@ -14,7 +16,7 @@ module AssetBender
     #    AssetBender::State.get_whatever_setting
     #
     def self.instance
-      raise "AssetBender::State has not been setup yet" unless @@global_state
+      raise AssetBender::Error.new "AssetBender::State has not been setup yet" unless @@global_state
       @@global_state
     end
 

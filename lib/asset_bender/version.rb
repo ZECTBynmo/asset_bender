@@ -2,6 +2,8 @@ require 'semver-tribe'
 
 module AssetBender
 
+  class VersionError < Error; end
+
   # Any kind of version in Asset Bender. That includes:
   #
   #   - A special version string like "recommended" or "edge"
@@ -28,7 +30,7 @@ module AssetBender
         @proxy = @special = SpecialVersion.new version_string
       else
         @proxy = @semver = Version.parse_semver version_string 
-        raise "Invalid version string: #{version_string}" if @semver.nil?
+        raise AssetBender::VersionError.new "Invalid version string: #{version_string}" if @semver.nil?
       end
     end
 
@@ -131,7 +133,7 @@ module AssetBender
 
     def <=> other
       return 0 if @version_string = other.version_string
-      raise "Can't compare a 'special' version string (#{version_string}) to #{other}"
+      raise AssetBender::VersionError.new "Can't compare a 'special' version string (#{version_string}) to #{other}"
     end
 
     def self.is_valid_version(version_string)

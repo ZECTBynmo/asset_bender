@@ -46,7 +46,7 @@ module AssetBender
       @is_from_filesystem = @domain.start_with? "file://"
       @domain = "http://#{@domain}" if not @is_from_filesystem && @domain =~ /^https?:\/\//
 
-      raise "Cache not yet implemented" if @has_cache
+      raise AssetBender::Error.new "Cache not yet implemented" if @has_cache
     end
 
     # Builds urls like:
@@ -58,7 +58,7 @@ module AssetBender
     #
     def url_for_build_pointer(project_name, version, func_options = nil)
       func_options ||= {}
-      raise "No need for a build url, version is already fixed (#{version})" unless version.is_wildcard
+      raise AssetBender::VersionError.new "No need for a build url, version is already fixed (#{version})" unless version.is_wildcard
 
       if version.is_special_build_string
         version_pointer = version.to_s
