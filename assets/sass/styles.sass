@@ -15,6 +15,10 @@ $darkOrangeRed: #df7524
 $green: #719954
 $darkGreen: #5d8741
 
+$lightBlue: #85b0de
+$blue: #3d74af 
+$darkBlue: #0c3c7e
+
 
 // MIXINS
 
@@ -38,9 +42,15 @@ $darkGreen: #5d8741
     +box-sizing(border-box)
 a
     text-decoration: none
+    color: $blue
 
-    &:link:hover
-        text-decoration: underline
+a:visited
+    color: $darkBlue
+
+a:link:hover
+    @extend a:visited
+    text-decoration: underline
+
 
 html
     font-size: 100%   // 1em == 16px
