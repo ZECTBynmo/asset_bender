@@ -90,27 +90,39 @@ describe 'VersionUtils' do
     names = ['project1', 'another_proj', 'b3st.thing-ev4r']
 
     it 'should find the string in a subpath' do
-      VersionUtils::look_for_strings_in_path("some/path/project1/version/lib.js", names).should eq("project1")
+      VersionUtils::look_for_string_in_path("some/path/project1/version/lib.js", names).should eq("project1")
     end
 
     it 'should find the string in a full path' do
-      VersionUtils::look_for_strings_in_path("/some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
+      VersionUtils::look_for_string_in_path("/some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
     end
 
     it 'should find the string in a file:// path' do
-      VersionUtils::look_for_strings_in_path("file://some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
+      VersionUtils::look_for_string_in_path("file://some/path/another_proj/v/coffee/app.coffee", names).should eq("another_proj")
     end
 
     it 'should find the string in a http:// path' do
-      VersionUtils::look_for_strings_in_path("http://some/path/b3st.thing-ev4r/v1.3.4/sass/styles.css", names).should eq("b3st.thing-ev4r")
+      VersionUtils::look_for_string_in_path("http://some/path/b3st.thing-ev4r/v1.3.4/sass/styles.css", names).should eq("b3st.thing-ev4r")
     end
 
     it 'should return nil if none of the strings are found' do
-      VersionUtils::look_for_strings_in_path("/some/path/non-project/version/lib.js", names).should be_nil
+      VersionUtils::look_for_string_in_path("/some/path/non-project/version/lib.js", names).should be_nil
     end
 
     it 'should only find the last (rightmost) match' do
-      VersionUtils::look_for_strings_in_path("/some/project1/path/another_proj/version/lib.js", names).should eq("another_proj")
+      VersionUtils::look_for_string_in_path("/some/project1/path/another_proj/version/lib.js", names).should eq("another_proj")
+    end
+  end
+
+  context 'when extracting strings and versions from paths' do
+    names = ['dep1', 'another_dep', 'b3st.dep-ev4r']
+
+    it 'should find the string and version in a subpath' do
+      VersionUtils::look_for_string_preceding_version_in_path("some/path/dep1/v1.2.3/lib.js", names).should eq(["dep1", AssetBender::Version.new("v1.2.3")])
+    end
+
+    it 'should find the string and version at the end' do
+      VersionUtils::look_for_string_preceding_version_in_path("some/path/another_dep/v10.0.97/", names).should eq(["another_dep", AssetBender::Version.new("v10.0.97")])
     end
   end
 

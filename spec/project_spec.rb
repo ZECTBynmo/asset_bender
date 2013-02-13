@@ -13,7 +13,7 @@ describe 'an AssetBender project' do
     proj.version.to_s.should eq(component_json['version'])
     proj.recommended_version.to_s.should eq(component_json['recommended_version'])
 
-    proj.dependency_names.should eq(component_json['dependencies'].keys)
+    proj.dependency_names.should eq(component_json['dependencies'].keys.map {|k| k.to_sym })
 
     proj.dependencies_by_name.each do |dep, version|
       version.should_not be_nil
