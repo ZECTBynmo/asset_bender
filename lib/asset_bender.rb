@@ -18,10 +18,13 @@ module AssetBender
   class Error < StandardError; end
 
   autoload :Project,           "asset_bender/project"
+  autoload :FilesystemProject, "asset_bender/filesystem_project"
   autoload :LocalProject,      "asset_bender/local_project"
+  autoload :Dependency,        "asset_bender/dependency"
   autoload :Version,           "asset_bender/version"
   autoload :Fetcher,           "asset_bender/fetcher"
   autoload :Config,            "asset_bender/config"
+  autoload :LocalArchive,      "asset_bender/local_archive"
   autoload :State,             "asset_bender/state"
   autoload :Directory,         "asset_bender/directory"
 end

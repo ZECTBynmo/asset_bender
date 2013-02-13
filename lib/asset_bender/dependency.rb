@@ -1,9 +1,9 @@
 module AssetBender
-  class Dependency < Project
+  class Dependency < FilesystemProject
 
     def initialize(config)
       super
-      raise "Dependencies should have fixed version numbers (version = #{@version}" if @version.is_wildcard
+      raise AssetBender::VersionError.new "Dependencies should have fixed version numbers (version = #{@version}" if @version.is_wildcard
     end
 
   end
