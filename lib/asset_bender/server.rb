@@ -29,7 +29,7 @@ module AssetBender
     
     configure do
       internal_assets_path = File.join project_root, 'assets'
-      State.setup Config.local_projects + [internal_assets_path], Config.local_archive
+      State.setup Config.local_projects + [internal_assets_path], Config.archive_dir
 
       State.available_projects.each do |project|
         sprockets.append_path project.path
@@ -46,7 +46,8 @@ module AssetBender
 
     get '/' do
       slim :projects, :locals => {
-        :projects => AssetBender::State.available_projects.reject {|p| p.name == 'asset_bender_assets'}
+        :projects => AssetBender::State.available_projects.reject {|p| p.name == 'asset_bender_assets'},
+        :dependencies_by_version => AssetBender::State.available_dependencies_and_versions,
       }
     end
 
@@ -56,10 +57,10 @@ module AssetBender
     end
 
     get '/*/' do
-      project = project_from_url
-      change_to_aliased_path_of project if path_matches_name_not_alias_from project
+      project_or_dependency = project_or_dependency_from_url
+      change_to_aliased_path_of project if project_or_dependency.is?(AssetBender::LocalProject) && path_matches_name_not_alias_from(project_or_dependency)
 
-      directory = AssetBender::Directory.new get_path, project
+      directory = AssetBender::Directory.new get_path, project_or_dependency
 
       if error = directory.check_forbidden or directory.check_directory_exists
         error
@@ -88,8 +89,12 @@ module AssetBender
       State.get_project_from_path get_path
     end
 
+    def project_or_dependency_from_url
+      State.get_project_or_dependency_from_path get_path
+    end
+
     def path_matches_name_not_alias_from project
-      project.alias && get_path.start_with?("/#{project.name}")
+      project && project.alias && get_path.start_with?("/#{project.name}")
     end
 
     def change_to_aliased_path_of project

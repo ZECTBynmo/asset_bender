@@ -26,4 +26,23 @@ section.projects
           .repoinfo == project.repo_info
           .mtime == "last modified #{project.last_modified_ago}"
 
+section.dependencies
+  header
+    .wrap
+      h1 Dependencies
+      .desc all the dependencies that are needed by local projects
+
+  - for dependency_name, versions in dependencies_by_version do
+    div.dependency
+      header
+        a href="/#{dependency_name}/"
+          h2.name = dependency_name
+
+      ul
+        - for version in versions do
+          li
+            a href="/#{dependency_name}/#{version}/" = version
+
+
+
 

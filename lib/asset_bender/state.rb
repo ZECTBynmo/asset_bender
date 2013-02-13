@@ -26,7 +26,7 @@ module AssetBender
     end
 
 
-    def initialize(project_paths, local_archive)
+    def initialize(project_paths, local_archive_path)
       projects = project_paths.map do |project_path|
         begin
           LocalProject.load_from_file File.expand_path project_path
@@ -47,12 +47,11 @@ module AssetBender
         @jasmine_projects.add project if project.has_specs?
       end
 
-      # local_archive.available_depedencies.each do |dependency|
-      #   names_and_aliases = [dependency.name] + dependency.aliases.to_a
-      #   add_multiple_keys_to_hash @available_dependencies_by_name, names_and_aliases, dependency
-      # end
+      @local_archive = AssetBender::LocalArchive.new local_archive_path
 
-      @global_fetcher = AssetBender::Fetcher.new 
+      # local_archive.available_depedencies.each do |dependency|
+      #   @available_dependencies_by_name[dependencies] = dependency
+      # end
     end
 
     # Delegate class methods to singleton insance
@@ -75,6 +74,13 @@ module AssetBender
       @local_archive.available_dependencies
     end
 
+    # Returns a hash of dependency names to an array of versions available
+    def available_dependencies_and_versions
+      available_dependency_names.each_with_object({}) do |dep_name, result|
+        result = local_archive.available_versions_for_dependency dep_name
+      end
+    end
+
     # Returns a set of all the dependencies that are in the archive
     def available_project_and_dependency_names
       Set.new @served_projects.names + available_dependency_names
@@ -88,7 +94,7 @@ module AssetBender
     # Returns the project instance from the passed name (or alias)
     # Fails and raises an error if the project doesn't exist
     def get_project(project_name)
-      raise "The #{project_name} project doesn't exists" unless project_exists? project_name
+      raise AssetBender::UnknownProjectError.new "The #{project_name} project doesn't exists" unless project_exists? project_name
       @served_projects_by_name[project_name]
     end
 
@@ -98,8 +104,24 @@ module AssetBender
     #
     # Returns nil if no project is found
     def get_project_from_path(url_or_path)
-      name = VersionUtils::look_for_strings_in_path url_or_path, available_project_names
-      get_project name
+      name = VersionUtils::look_for_string_in_path url_or_path, available_project_names
+      get_project name if name
+    end
+
+    # Returns the dependency instance that represents the passed in path, by
+    # looking for a "/<dep_name>/<version>/" that matches one of the dependencies
+    # in the archive.
+    #
+    # Returns nil if no dependecy with that version is found
+    def get_dependency_from_path(url_or_path)
+      name, version = VersionUtils::look_for_string_preceding_version_in_path url_or_path, available_dependency_names
+      local_archive.get_dependency name, version 
+    end
+
+    def get_project_or_dependency_from_path(url_or_path)
+      result = get_project_from_path url_or_path
+      result = get_dependency_from_path url_or_path unless result
+      result
     end
 
     # Helpers
