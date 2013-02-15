@@ -2,7 +2,8 @@ require 'net/http'
 require 'uri'
 
 module AssetBender
-  class FetchError < StandardError; end
+  class FetchError < Error; end
+  class DownloadError < Error; end
 
   module HTTPUtils
 
@@ -61,6 +62,34 @@ module AssetBender
 
   end
 
+  def download_file(url, destination_path)
+      uri = URI.parse url
+      downloaded_file = open destination_path, "w"
+
+      begin
+          Net::HTTP.start(uri.host, uri.port) do |http|
+              http.request_get(uri.path) do |resp|
+                  raise AssetBender::DownloadError.new(resp) unless resp.kind_of? Net::HTTPSuccess
+
+                  resp.read_body do |segment|
+                      downloaded_file << segment
+                      sleep 0.005
+                  end
+              end
+          end
+
+          downloaded_file
+      rescue AssetBender::DownloadError => e
+          logger.error "Error downloading #{uri} ({e.response.code}: #{e.response.message}!" 
+          nil
+      rescue
+          logger.error "Error downloading #{uri}"
+          logger.error $!
+          nil
+      ensure
+          downloaded_file.close()
+      end
+  end
 
   class HTTPUtilsInstance
     include HTTPUtils
