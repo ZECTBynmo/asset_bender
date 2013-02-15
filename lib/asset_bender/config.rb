@@ -14,6 +14,12 @@ module AssetBender
     extend SingleForwardable
     extend CustomSingleton
 
+    DEFAULT_CONFIG = {
+      :build_hash_filename => "premunged-static-contents-hash.md5",
+      :denormalized_dependencies_filename => "denormalized-deps.json",
+      :info_filename => "info.txt",
+    }
+
     # Load the global config singleton that will be avialble as:
     #
     #    AssetBender::Config.get_whatever_setting
@@ -49,7 +55,7 @@ module AssetBender
         create_brand_new_config_file if create_if_doesnt_exist
       end
 
-      config ||= FlexibleConfig.new
+      config = FlexibleConfig.new DEFAULT_CONFIG
 
       # Inherited config
       extended_config_files(config_data).each do |parent_config_file|
