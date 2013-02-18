@@ -1,7 +1,5 @@
-# Early monkeypatches
-require "asset_bender/patches/transform_hash_keys_to_symbols"
-
 require "custom_singleton"
+require "flexible_config"
 
 
 module AssetBender
@@ -15,14 +13,17 @@ module AssetBender
   require "asset_bender/http_utils"
   require "asset_bender/proc_utils"
 
-  autoload :Project,           "asset_bender/project"
-  autoload :FilesystemProject, "asset_bender/filesystem_project"
-  autoload :LocalProject,      "asset_bender/local_project"
-  autoload :Dependency,        "asset_bender/dependency"
-  autoload :Version,           "asset_bender/version"
-  autoload :Fetcher,           "asset_bender/fetcher"
-  autoload :Config,            "asset_bender/config"
-  autoload :LocalArchive,      "asset_bender/local_archive"
-  autoload :State,             "asset_bender/state"
-  autoload :Directory,         "asset_bender/directory"
+  autoload :ProjectsManager,             "asset_bender/projects_manager"
+  autoload :DependenciesManager,         "asset_bender/dependencies_manager"
+  autoload :LocalArchive,                "asset_bender/local_archive"
+
+  autoload :AbstractProject,             "asset_bender/project"
+  autoload :AbstractFilesystemProject,   "asset_bender/filesystem_project"
+  autoload :LocalProject,                "asset_bender/local_project"
+  autoload :Dependency,                  "asset_bender/dependency"
+
+  autoload :Version,                     "asset_bender/version"
+  autoload :Fetcher,                     "asset_bender/fetcher"
+  autoload :Config,                      "asset_bender/config"
+  autoload :Directory,                   "asset_bender/directory"
 end

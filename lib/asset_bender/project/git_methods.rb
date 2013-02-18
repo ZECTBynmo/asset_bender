@@ -1,7 +1,7 @@
 require 'git'
 
 module AssetBender
-  class Project
+  class AbstractProject
 
     module GitMethods
       def git

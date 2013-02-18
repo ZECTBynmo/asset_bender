@@ -9,12 +9,16 @@ require 'sass'
 require 'compass'
 require 'coffee-script'
 require 'slim'
+require 'set'
 
 require 'asset_bender'
 
-Compass.configuration do |compass|
 
+Compass.configuration do |compass|
 end
+
+AssetBender::Config.load_all_base_config_files
+
 
 module AssetBender
   class Server < Sinatra::Base
@@ -29,9 +33,10 @@ module AssetBender
     
     configure do
       internal_assets_path = File.join project_root, 'assets'
-      State.setup Config.local_projects + [internal_assets_path], Config.archive_dir
+      ProjectsManager.setup Config.local_projects + [internal_assets_path]
+      DependenciesManager.setup Config.archive_dir
 
-      State.available_projects.each do |project|
+      ProjectsManager.available_projects.each do |project|
         sprockets.append_path project.path
       end
     end
@@ -46,8 +51,8 @@ module AssetBender
 
     get '/' do
       slim :projects, :locals => {
-        :projects => AssetBender::State.available_projects.reject {|p| p.name == 'asset_bender_assets'},
-        :dependencies_by_version => AssetBender::State.available_dependencies_and_versions,
+        :projects => ProjectsManager.available_projects.reject {|p| p.name == 'asset_bender_assets'},
+        :dependencies_by_version => DependenciesManager.available_dependencies_and_versions,
       }
     end
 
@@ -86,11 +91,11 @@ module AssetBender
     end
 
     def project_from_url
-      State.get_project_from_path get_path
+      ProjectsManager.get_project_from_path get_path
     end
 
     def project_or_dependency_from_url
-      State.get_project_or_dependency_from_path get_path
+      get_project_or_dependency_from_path get_path
     end
 
     def path_matches_name_not_alias_from project
@@ -99,6 +104,16 @@ module AssetBender
 
     def change_to_aliased_path_of project
       env['PATH_INFO'].sub! "/#{project.name}/", "/#{project.alias}/"
+    end
+
+    def available_project_and_dependency_names
+      Set.new ProjectsManager.served_projects.names + DependenciesManager.available_dependency_names
+    end
+
+    def get_project_or_dependency_from_path(url_or_path)
+      result = ProjectsManager.get_project_from_path url_or_path
+      result = DependenciesManager.get_dependency_from_path url_or_path unless result
+      result
     end
 
     AssetRedirects = {

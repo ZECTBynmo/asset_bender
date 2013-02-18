@@ -4,29 +4,28 @@ module AssetBender
 
   class UnknownProjectError < StandardError; end
   
-  class State
+  class ProjectsManager
     include CustomSingleton
     include LoggerUtils
 
     attr_reader :served_projects_by_name,  # Also by alias if there is one
                 :jasmine_projects
 
-    # Load the global state singleton that will be avialble as:
+    # Load the global singleton that will be avialble as:
     #
-    #    AssetBender::State.get_whatever_setting
+    #    AssetBender::ProjectsManager.get_whatever_setting
     #
     def self.instance
-      raise AssetBender::Error.new "AssetBender::State has not been setup yet" unless @@global_state
-      @@global_state
+      raise AssetBender::Error.new "AssetBender::ProjectsManager has not been setup yet" unless @@global_instance
+      @@global_instance
     end
 
-    # Called to setup the State singleton
+    # Called to setup the ProjectsManager singleton
     def self.setup(*args)
-      @@global_state = self.send :new, *args
+      @@global_instance = self.send :new, *args
     end
 
-
-    def initialize(project_paths, local_archive_path)
+    def initialize(project_paths)
       projects = project_paths.map do |project_path|
         begin
           LocalProject.load_from_file File.expand_path project_path
@@ -46,12 +45,6 @@ module AssetBender
 
         @jasmine_projects.add project if project.has_specs?
       end
-
-      @local_archive = AssetBender::LocalArchive.new local_archive_path
-
-      # local_archive.available_depedencies.each do |dependency|
-      #   @available_dependencies_by_name[dependencies] = dependency
-      # end
     end
 
     # Delegate class methods to singleton insance
@@ -67,23 +60,6 @@ module AssetBender
     # Returns a list of all the names of projects that are locally being served
     def available_project_names
       @served_projects_by_name.keys
-    end
-
-    # Returns a set of all the dependencies that are in the archive
-    def available_dependency_names
-      @local_archive.available_dependencies
-    end
-
-    # Returns a hash of dependency names to an array of versions available
-    def available_dependencies_and_versions
-      available_dependency_names.each_with_object({}) do |dep_name, result|
-        result = local_archive.available_versions_for_dependency dep_name
-      end
-    end
-
-    # Returns a set of all the dependencies that are in the archive
-    def available_project_and_dependency_names
-      Set.new @served_projects.names + available_dependency_names
     end
 
     # Returns whether the specified project is being locally served
@@ -106,22 +82,6 @@ module AssetBender
     def get_project_from_path(url_or_path)
       name = VersionUtils::look_for_string_in_path url_or_path, available_project_names
       get_project name if name
-    end
-
-    # Returns the dependency instance that represents the passed in path, by
-    # looking for a "/<dep_name>/<version>/" that matches one of the dependencies
-    # in the archive.
-    #
-    # Returns nil if no dependecy with that version is found
-    def get_dependency_from_path(url_or_path)
-      name, version = VersionUtils::look_for_string_preceding_version_in_path url_or_path, available_dependency_names
-      local_archive.get_dependency name, version 
-    end
-
-    def get_project_or_dependency_from_path(url_or_path)
-      result = get_project_from_path url_or_path
-      result = get_dependency_from_path url_or_path unless result
-      result
     end
 
     # Helpers

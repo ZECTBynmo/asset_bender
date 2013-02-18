@@ -1,7 +1,7 @@
 require "asset_bender/project/git_methods"
 
 module AssetBender
-  class LocalProject < FilesystemProject
+  class LocalProject < AbstractFilesystemProject
     attr_reader :path, :spec_directory
 
     POSSIBLE_SPEC_DIRS = [

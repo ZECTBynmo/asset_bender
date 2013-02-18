@@ -8,7 +8,7 @@ require 'action_view'
 CurrentUser = Etc.getlogin
 
 module AssetBender
-  class Project
+  class AbstractProject
 
     module RenderMethods
       include ActionView::Helpers::DateHelper

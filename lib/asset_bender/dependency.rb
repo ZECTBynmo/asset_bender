@@ -1,5 +1,5 @@
 module AssetBender
-  class Dependency < FilesystemProject
+  class Dependency < AbstractFilesystemProject
 
     def initialize(config)
       super

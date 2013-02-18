@@ -4,7 +4,7 @@ require 'asset_bender'
 module AssetBender
   class ProjectLoadError < AssetBender::Error; end
 
-  class Project
+  class AbstractProject
     extend ConfLoaderUtils
     include LoggerUtils
     extend LoggerUtils

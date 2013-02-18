@@ -1,7 +1,7 @@
 require "asset_bender/project/render_methods"
 
 module AssetBender
-  class FilesystemProject < Project
+  class AbstractFilesystemProject < AbstractProject
     attr_reader :path
 
     include RenderMethods
