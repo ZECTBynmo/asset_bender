@@ -7,6 +7,11 @@ module AssetBender
     FILENAME = ".bender.yaml"
     PATH = "~/"
 
+    @skip_global_config = false
+    class << self
+      attr_accessor :skip_global_config
+    end
+
     extend ConfLoaderUtils
     include LoggerUtils
     extend LoggerUtils
@@ -25,7 +30,11 @@ module AssetBender
     #    AssetBender::Config.get_whatever_setting
     #
     def self.instance
-      @@global_config ||= Config.load
+      if @skip_global_config
+        @@global_config ||= Config.load_empty
+      else
+        @@global_config ||= Config.load
+      end
     end
 
     # Delegate to the singleton methods
@@ -64,6 +73,10 @@ module AssetBender
 
       config.update! config_data
       config
+    end
+
+    def self.load_empty
+      FlexibleConfig.new DEFAULT_CONFIG
     end
 
     # Retrieves the "extends" key, deletes it from the passed hash

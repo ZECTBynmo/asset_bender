@@ -17,7 +17,7 @@ describe 'an AssetBender project' do
 
     proj.dependencies_by_name.each do |dep, version|
       version.should_not be_nil
-      version.format(AB::Version::FORMAT).to_s.should eq(component_json['dependencies'][dep])
+      version.format(AB::Version::FORMAT).to_s.should eq(component_json['dependencies'][dep.to_s])
     end
   end
 

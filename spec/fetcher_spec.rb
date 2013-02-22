@@ -34,7 +34,7 @@ describe AB::Fetcher do
 
   context 'when a url for a build is created with a special version string' do
     subject { @df.url_for_build_pointer 'project_foo', AB::Version.new('edge') }
-    it { should eq("http://somecrazydomain.net/project_foo/edge-qa") }
+    it { should eq("http://somecrazydomain.net/project_foo/edge") }
   end
 
   context 'when a url for a build is created with a fixed version' do

@@ -17,6 +17,7 @@ AssetBender::Config.register_extendable_base_config 'test_base2' do
   }
 end
 
+
 describe AB::Config do
 
   it 'should default to loading from the home directory' do
@@ -59,7 +60,7 @@ describe AB::Config do
   it 'can be exported as a hash' do
     config = AB::Config.load fixture_path "example-bender.yaml"
     
-    config.to_hash.should eq({
+    config.to_hash.should eq(AB::Config::DEFAULT_CONFIG.merge({
       :base_setting=>"some setting", 
       :shared_setting=>10, 
       :a_shared_hash=>{
@@ -75,7 +76,7 @@ describe AB::Config do
           :stuff=>"that is awesome"
         }
       }
-    })
+    }))
   end
 
   it 'should extend multiple configs' do
@@ -87,8 +88,7 @@ describe AB::Config do
   end
 
   it 'should have a singleton global config' do
-    AB::Config.instance.mysetting.should eq("timmfin")
-    AB::Config.mysetting.should eq("timmfin")
+    AB::Config.instance.to_hash.should eq(AB::Config::DEFAULT_CONFIG)
 
     AB::Config.instance.new_setting = { :test => "yes" }
     AB::Config.new_setting.test.should eq("yes")

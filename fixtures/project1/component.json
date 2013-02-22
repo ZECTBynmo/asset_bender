@@ -3,7 +3,7 @@
     "description": "A text fixture project",
     "version": "2.1.x",
     
-    "recommended_version": "1.2.x",
+    "recommendedVersion": "1.2.x",
 
     "dependencies": {
         "teh_project":          "1.7.x",

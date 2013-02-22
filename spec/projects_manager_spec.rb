@@ -2,7 +2,7 @@ require "asset_bender_test"
 
 ProjectsManager = AssetBender::ProjectsManager
 
-describe ProjectsManager do
+describe "ProjectsManager" do
   before(:each) do
     fixture_projects = [
       fixture_path('project1'),
@@ -11,7 +11,7 @@ describe ProjectsManager do
 
     local_archive = nil
 
-    ProjectsManager.setup fixture_projects, local_archive
+    ProjectsManager.setup fixture_projects
   end
 
   context 'when extracting project from paths' do

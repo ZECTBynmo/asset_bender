@@ -3,7 +3,7 @@
     "description": "Another text fixture project",
     "version": "0.1.x",
     
-    "recommended_version": "0.x.x",
+    "recommendedVersion": "0.x.x",
 
     "dependencies": {
     }
