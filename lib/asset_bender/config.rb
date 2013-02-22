@@ -94,7 +94,8 @@ module AssetBender
           parent_config
         end
       else 
-        load_json_or_yaml_file File.extend_path parent_config_file
+        logger.warn "No such #{name_or_file} base config, looking for it on the filesystem"
+        load_json_or_yaml_file File.expand_path name_or_file
       end
     end
 
@@ -130,6 +131,13 @@ module AssetBender
       print "\n", "template:  #{template}", "\n\n"
     end
 
+    # Load all files in the config folder (since base configs are defined there)
+    def self.load_all_base_config_files
+      Dir[File.expand_path(File.join(__FILE__,'../../../config/*.rb'))].each do |file|
+        logger.info "Loading initial base config: #{file}"
+        require file
+      end
+    end
 
     private
 
@@ -156,11 +164,5 @@ local_projects:
 """
 
   end
-
 end
 
-# Load all files in the config folder (since base configs are defined there)
-Dir[File.expand_path(File.join(__FILE__,'../../../config/*.rb'))].each do |file|
-  AssetBender::logger.info "Loading base config: #{file}"
-  require file
-end

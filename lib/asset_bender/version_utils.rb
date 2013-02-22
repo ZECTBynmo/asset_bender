@@ -35,14 +35,14 @@ module AssetBender
         Regexp.new "#{project_name_escaped}\/(static|version|[\\w-]+)/", Regexp::MULTILINE
     end
 
-    def self.project_with_version(project_name, semver, version_format = nil)
+    def self.project_with_version_path(project_name, semver, version_format = nil)
         version_format ||= AB::Version::URL_OUTPUT_FORMAT
         "#{project_name}/#{semver.format version_format}/"
     end
 
     def self.replace_project_versions_in(string_to_replace, project_name, semver)
         re = project_replacement_regex project_name
-        value = project_with_version project_name, semver
+        value = project_with_version_path project_name, semver
 
         string_to_replace.gsub! re, value
     end

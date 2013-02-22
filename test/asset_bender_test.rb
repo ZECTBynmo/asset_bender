@@ -1,7 +1,7 @@
 require 'bundler/setup'
 
 require 'asset_bender'
-require 'spec_helper'
+require 'test/unit'
 
 
 FIXTURE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures"))

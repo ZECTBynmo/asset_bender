@@ -23,8 +23,8 @@ module AssetBender
 
       @version = AssetBender::Version.new @config[:version]
 
-      if @config[:recommended_version]
-        @recommended_version = AssetBender::Version.new @config[:recommended_version]
+      if @config[:recommendedVersion]
+        @recommended_version = AssetBender::Version.new @config[:recommendedVersion]
       else
         logger.warn "No recommended version specified for #{@name}, assuming it is the same as the current version."
         @recommended_version = @version.dup
@@ -92,23 +92,6 @@ module AssetBender
       deps_with_semvers
     end
 
-    # Returns an array of project and/or dependency objects that represent match
-    # the versions specified in this project's comonent.json
-    #
-    # Note, this is meomized and is only called once (unless the force_reresolve
-    # option is passed)
-    def resolved_dependencies(options = nil)
-      options ||= {}
-      @_resolved_dependencies = nil if options[:force_reresolved]
-
-      if @_resolved_dependencies.nil?
-        logger.error 'TODO IMPLEMENT RESOLVED_DEPENDENCIES'
-
-      end
-
-      @_resolved_dependencies
-    end
 
   end
-
 end

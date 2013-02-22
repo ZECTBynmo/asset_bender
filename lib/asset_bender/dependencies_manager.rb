@@ -11,7 +11,7 @@ module AssetBender
     #    AssetBender::DependenciesManager.get_whatever_setting
     #
     def self.instance
-      raise AssetBender::Error.new "AssetBender::DependenciesManager has not been setup yet" unless @@global_instance
+      raise AssetBender::Error.new "AssetBender::DependenciesManager has not been setup yet" unless defined? @@global_instance
       @@global_instance
     end
 

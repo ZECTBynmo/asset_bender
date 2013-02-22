@@ -40,12 +40,26 @@ module AssetBender
     end
 
     def get_dependency(dependency_name, version)
+      print "\n", "dependency_name:  #{dependency_name.inspect}", "\n\n"
+      print "\n", "version:  #{version.inspect}", "\n\n"
       begin
         AssetBender::Dependency.load_from_file File.join dependency_name, version.to_s
       rescue AssetBender::ProjectLoadError => e
         logger.error e
         nil
       end
+    end
+
+    def archive_name(dependency)
+      resolved_version_string = dependency.resolved_version.url_format
+      "#{dependency.name}-#{resolved_version_string}-src.tar.gz"
+    end
+
+    def archive_url(dep)
+      archive_domain = AssetBender::Config.domain
+      archive_prefix = AssetBender::Config.archive_url_prefix || ''
+
+      "#{archive_domain}/#{archive_prefix}/#{archive_name(dep)}"
     end
 
   end

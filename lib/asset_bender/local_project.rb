@@ -11,6 +11,13 @@ module AssetBender
 
     include GitMethods
 
+    def initialize(config, path_to_project)
+      super
+
+      check_for_alias
+      check_for_spec_directory
+    end
+
     def version_to_build
       if @version.is_wildcard
         @version

@@ -48,7 +48,7 @@ describe 'VersionUtils' do
 
     @project_names[0...2].zip(semvers, output) do |args|
       project_name, semver, output = args
-      VersionUtils::project_with_version(project_name, semver).should eq(output)
+      VersionUtils::project_with_version_path(project_name, semver).should eq(output)
     end
   end
 

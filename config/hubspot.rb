@@ -3,6 +3,7 @@ AssetBender::Config.register_extendable_base_config('base_hubspot_settings', {
   :cdn_domain => "static2cdn.hubspot.com",
 
   :archive_dir => "~/.bender-archive/",
+  :archive_url_prefix => "archive",
 
   # :allow_projects_without_component_json => true,
 })
@@ -22,8 +23,8 @@ local_projects:
 
 # port: 3333
 
-# Preload style_guide bundle on startup (on by default)
-# preload_style_guide_bundle: true
+# project_to_preload:
+#  - style_guide
 
 # Note, if you change this file you need to restart the bender server
 """)
@@ -42,7 +43,6 @@ def convert_to_asset_bender_version(version_string)
 
   elsif version_string == 'current'
     'recommended'
-
   end
 end
 
@@ -63,8 +63,22 @@ AssetBender::Config.project_config_fallback = lambda do |path|
     end
   end
 
-  # print "\n", "static_conf:  #{static_conf.inspect}", "\n\n"
-  # print "\n", "result:  #{result.inspect}", "\n\n"
-
   result
+end
+
+
+# Additional methods for Version instances
+
+module AssetBender
+  class Version
+
+    # Convert a semver to the version system hubspot used to use, "static-x.y"
+    def to_legacy_hubspot_version
+      raise AssetBender::Error.new "Can only convert fixed versions to legacy hubspot version strings" if @semver.nil?
+      logger.warn "Major versions other than 0 are lost in the legacy hubspot version conversion" if @semver.major > 0
+
+      @semver.format "static-%m-%p"
+    end
+
+  end
 end

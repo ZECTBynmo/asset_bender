@@ -16,7 +16,7 @@ module AssetBender
     #    AssetBender::ProjectsManager.get_whatever_setting
     #
     def self.instance
-      raise AssetBender::Error.new "AssetBender::ProjectsManager has not been setup yet" unless @@global_instance
+      raise AssetBender::Error.new "AssetBender::ProjectsManager has not been setup yet" unless defined? @@global_instance
       @@global_instance
     end
 

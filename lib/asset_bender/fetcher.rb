@@ -11,10 +11,6 @@ module AssetBender
       :cache => false,
       :environment => :qa,
       :domain => nil,
-
-      :build_hash_filename => "premunged-static-contents-hash.md5",
-      :denormalized_dependencies_filename => "denormalized-deps.json",
-      :info_filename => "info.txt",
     }
 
     PULL_FROM_GLOBAL_CONFIG = [
@@ -31,20 +27,24 @@ module AssetBender
     # so you can share a  Fetcher object, and call fetch calls from it will be cached.
     def initialize(options = nil)
       options ||= {}
-      @options = DEFAULT_OPTIONS.merge options
 
+      # Start with the default settings
+      @options = DEFAULT_OPTIONS.dup
+
+      # Then pull in any global settings
       PULL_FROM_GLOBAL_CONFIG.each do |setting|
         @options[setting] = Config[setting] unless Config[setting].nil?
       end
 
-      print "\n", "options:  #{options.inspect}", "\n\n"
+      # Then use the passed in settings
+      @options = @options.merge options
 
       @has_cache = @options[:cache]
 
       # Normalize the base domain
       @domain = @options[:domain]
       @is_from_filesystem = @domain.start_with? "file://"
-      @domain = "http://#{@domain}" if not @is_from_filesystem && @domain =~ /^https?:\/\//
+      @domain = "http://#{@domain}" if not @is_from_filesystem && @domain !=~ /^https?:\/\//
 
       raise AssetBender::Error.new "Cache not yet implemented" if @has_cache
     end
@@ -62,12 +62,16 @@ module AssetBender
 
       if version.is_special_build_string
         version_pointer = version.to_s
+
+      elsif version.is_complete_wildcard
+        version_pointer = 'edge'
+
       else
         version_prefix = version.non_wildcard_prefix
         version_pointer = "latest-version-#{version_prefix}"
       end
 
-      if !func_options[:force_production] and @options[:environment] != :production
+      if version_pointer != 'edge' && !func_options[:force_production] && @options[:environment] != :production
         version_pointer += "-qa" 
       end
 
@@ -109,9 +113,31 @@ module AssetBender
       call_if_proc_otherwise_self @options[:info_filename]
     end
 
+    def resolve_version_for_project(project_or_dep_name, version_wildcard, func_options = nil)
+      Version.new fetch_build_for_project(project_or_dep_name, version_wildcard, func_options)
+    end
+
+    def fetch_build_for_project(project_or_dep_name, version_wildcard, func_options = nil)
+      url = url_for_build_pointer project_or_dep_name, version_wildcard, func_options
+
+      begin
+        resolved_dep_version_string = fetch_url_with_retries(url).strip
+      rescue
+        logger.warn $!
+        resolved_dep_version_string = nil
+      end
+
+      if resolved_dep_version_string.nil? || resolved_dep_version_string.empty?
+        logger.warn "Warning, can't resolve build for #{project_or_dep_name} (version = #{version_wildcard}). Nothing exists at: #{url}"
+        nil
+      else
+        resolved_dep_version_string
+      end
+    end
+
     # Makes a HTTP request to your configured domain to figure out the last successful
     # build version for the passed project
-    def fetch_last_successful_build(project, func_options = nil)
+    def fetch_last_build(project, func_options = nil)
       func_options ||= {}
       url = url_for_build_pointer project.name, project.version_to_build, func_options
 
@@ -133,14 +159,14 @@ module AssetBender
     # Makes a HTTP request to your configured domain to figure out the last successful
     # production build version for the passed project
     def fetch_last_production_build(project)
-      fetch_last_successful_build project, { :force_production => true }
+      fetch_last_build project, { :force_production => true }
     end
 
     # Makes a HTTP request to your configured domain to grab the build hash 
     # for last successful build of the passed project. (Which can be used to detect if
     # a build has any new changes that need to be uploaded)
     def fetch_last_build_hash(project)
-      last_build_version = fetch_last_successful_build(project)
+      last_build_version = fetch_last_build(project)
       url = build_asset_url project.name, last_build_version, build_hash_filename
 
       begin
@@ -162,7 +188,7 @@ module AssetBender
     # for last successful build of the passed project. Retruns a dictionary of project name
     # to verions (AssetBender::Version instances).
     def fetch_last_builds_dependencies(project)
-      last_build_version = fetch_last_successful_build(project)
+      last_build_version = fetch_last_build(project)
       url = build_asset_url project.name, last_build_version, denormalized_dependencies_filename
 
       begin
@@ -189,7 +215,7 @@ module AssetBender
     # (They are needed to shove into the python/node build artifacts if the current static build
     # has no changes and won't be uploaded)
     def fetch_last_build_infomation(project)
-      last_build_version = fetch_last_successful_build(project)
+      last_build_version = fetch_last_build(project)
 
       config_url =             build_asset_url project.name, last_build_version, "component.json"
       denormalized_deps_url =  build_asset_url project.name, last_build_version, denormalized_dependencies_filename

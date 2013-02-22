@@ -11,7 +11,7 @@ describe 'an AssetBender project' do
     proj.description.should eq(component_json['description'])
 
     proj.version.to_s.should eq(component_json['version'])
-    proj.recommended_version.to_s.should eq(component_json['recommended_version'])
+    proj.recommended_version.to_s.should eq(component_json['recommendedVersion'])
 
     proj.dependency_names.should eq(component_json['dependencies'].keys.map {|k| k.to_sym })
 

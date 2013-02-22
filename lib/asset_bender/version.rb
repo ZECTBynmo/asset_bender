@@ -52,6 +52,11 @@ module AssetBender
       end
     end
 
+    def url_format
+       format URL_OUTPUT_FORMAT
+    end
+    alias_method :path_format, :url_format
+
     def abbrev
       if @semver.nil?
         @special.abbrev 

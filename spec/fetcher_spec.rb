@@ -66,7 +66,7 @@ describe AB::Fetcher do
   end
 
   context 'when the last build is fetched' do
-    subject { @df.fetch_last_successful_build(@project1) }
+    subject { @df.fetch_last_build(@project1) }
     it { should eq("v2.1.7") }
   end
 
