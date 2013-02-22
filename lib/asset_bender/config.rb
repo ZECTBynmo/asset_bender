@@ -60,7 +60,7 @@ module AssetBender
       begin
         config_data = load_json_or_yaml_file filename_to_load
       rescue Errno::ENOENT
-        logger.warning "Config file doesn't exist at: #{filename_to_load}. Creating one."
+        logger.warn "Config file doesn't exist at: #{filename_to_load}. Creating one."
         create_brand_new_config_file if create_if_doesnt_exist
       end
 
