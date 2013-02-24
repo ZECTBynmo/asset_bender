@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 gem 'sinatra'
 gem 'sinatra-contrib'
@@ -16,12 +16,12 @@ gem "coffee-script-source", "~> 1.4.0"
 
 gem 'uglifier', '>= 1.2'
 
-gem 'sprockets', :github => 'sstephenson/sprockets', :branch => 'master'
-gem 'hike', :github => 'sstephenson/hike', :branch => 'master'
+gem 'sprockets', :github => 'timmfin/sprocket-tribe', :branch => 'master'
+gem 'hike', :github => 'timmfin/hike-tribe', :branch => 'master'
 
 gem 'sprockets-sass'
 
-gem 'semver-tribe', :github => 'timmfin/semver-tribe', :branch => 'master'
+gem 'semver-tribe', :github => 'timmfin/semver', :branch => 'master'
 
 group :development do
 end

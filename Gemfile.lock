@@ -1,12 +1,19 @@
 GIT
-  remote: git://github.com/sstephenson/hike.git
+  remote: git://github.com/timmfin/hike-tribe.git
   revision: ff50c167cd107847e88307825a98fd928f4e6d13
   branch: master
   specs:
-    hike (1.2.2)
+    hike (1.2.1)
 
 GIT
-  remote: git://github.com/sstephenson/sprockets.git
+  remote: git://github.com/timmfin/semver.git
+  revision: 073bdf962b14246a581c01ac8b6768f44aebdba0
+  branch: master
+  specs:
+    semver-tribe (0.1.1)
+
+GIT
+  remote: git://github.com/timmfin/sprocket-tribe.git
   revision: 5112012d559d34d5e3639daec21df34536ee5c5d
   branch: master
   specs:
@@ -16,15 +23,8 @@ GIT
       rack (~> 1.0)
       tilt (~> 1.1, != 1.3.0)
 
-GIT
-  remote: git://github.com/timmfin/semver-tribe.git
-  revision: 96b26c850759b6832c41aa836244487415abb817
-  branch: master
-  specs:
-    semver-tribe (0.1.1)
-
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     actionpack (2.3.2)
       activesupport (= 2.3.2)
