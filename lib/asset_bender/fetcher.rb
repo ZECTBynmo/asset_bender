@@ -42,7 +42,7 @@ module AssetBender
       @has_cache = @options[:cache]
 
       # Normalize the base domain
-      @domain = @options[:domain]
+      @domain = @options[:domain] || ""
       @is_from_filesystem = @domain.start_with? "file://"
       @domain = "http://#{@domain}" if not @is_from_filesystem && @domain !=~ /^https?:\/\//
 
@@ -58,9 +58,9 @@ module AssetBender
     #
     def url_for_build_pointer(project_name, version, func_options = nil)
       func_options ||= {}
-      raise AssetBender::VersionError.new "No need for a build url, version is already fixed (#{version})" unless version.is_wildcard
+      raise AssetBender::VersionError.new "No need for a build url, version is already fixed (#{version})" unless version.is_wildcard?
 
-      if version.is_special_build_string
+      if version.is_special_build_string?
         version_pointer = version.to_s
 
       elsif version.is_complete_wildcard

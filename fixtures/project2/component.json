@@ -6,5 +6,6 @@
     "recommendedVersion": "0.x.x",
 
     "dependencies": {
+        "yet_another_project":  "2.3.52"
     }
 }

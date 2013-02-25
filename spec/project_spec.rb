@@ -21,6 +21,10 @@ describe 'an AssetBender project' do
     end
   end
 
+  it "throws an error if the component.json is invalid" do
+    expect { AB::LocalProject.load_from_file fixture_path('broken_proj') }.to raise_error
+  end
+
   it "has an alias if the parent folder doesn't match the name in the component.json" do
     proj = AB::LocalProject.load_from_file fixture_path('project2')
     proj.name.should eq("project2_real_name")

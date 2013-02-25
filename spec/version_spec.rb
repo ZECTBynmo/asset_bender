@@ -61,7 +61,7 @@ describe 'VersionUtils' do
     versions.zip(semvers).each do |(str, semver)|
       parsed_semver = AB::Version.new(str)
       parsed_semver.should eq(semver)
-      parsed_semver.is_wildcard.should be_true
+      parsed_semver.is_wildcard?.should be_true
     end
   end
 
@@ -82,8 +82,16 @@ describe 'VersionUtils' do
     versions.zip(version_vals).each do |(str, val)|
       parsed_version = AB::Version.new(str)
       parsed_version.to_s.should eq(val)
-      parsed_version.is_wildcard.should be_true
+      parsed_version.is_wildcard?.should be_true
     end
+  end
+
+  it 'should format url versions with a v' do
+    AB::Version.new("1.2.3").url_format.should eq("v1.2.3")
+  end
+
+  it 'should format path versions with a v' do
+    AB::Version.new("1.2.3").path_format.should eq("v1.2.3")
   end
 
 end

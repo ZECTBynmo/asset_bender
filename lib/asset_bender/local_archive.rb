@@ -39,11 +39,14 @@ module AssetBender
       end
     end
 
+    def dependency_exists?(dependency_name, version)
+      dep_path = File.join @path, dependency_name.to_s, version.path_format
+      Dir.exist?(dep_path)
+    end
+
     def get_dependency(dependency_name, version)
-      print "\n", "dependency_name:  #{dependency_name.inspect}", "\n\n"
-      print "\n", "version:  #{version.inspect}", "\n\n"
       begin
-        AssetBender::Dependency.load_from_file File.join dependency_name, version.to_s
+        AssetBender::Dependency.load_from_file File.join @path, dependency_name.to_s, version.path_format
       rescue AssetBender::ProjectLoadError => e
         logger.error e
         nil

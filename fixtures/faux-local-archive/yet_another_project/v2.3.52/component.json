@@ -1,0 +1,9 @@
+{
+    "name": "yet_another_project",
+    "description": "Bla bla bla...",
+    "version": "v2.3.52",
+    
+    "dependencies": {
+        "proj_foo": "2.x.x"
+    }
+}

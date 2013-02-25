@@ -55,6 +55,10 @@ module AssetBender
       get_project name if name
     end
 
+    def dependency_exists?(dep_name, resolved_version)
+      @local_archive.dependency_exists? dep_name, resolved_version
+    end
+
     # Returns the dependency instance from the passed name and resolved version
     # Fails and raises an error if a dependency with that version doesn't exist
     # in the archive

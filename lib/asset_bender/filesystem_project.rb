@@ -36,7 +36,7 @@ module AssetBender
     # option is passed)
     def resolved_dependencies(options = nil)
       options ||= {}
-      @_resolved_dependencies = nil if options[:force_reresolved]
+      @_resolved_dependencies = nil if options[:force_reresolve]
       fetcher = options[:fetcher] || AssetBender::Fetcher.new
 
       if @_resolved_dependencies.nil?
@@ -45,14 +45,27 @@ module AssetBender
         @dependencies_by_name.each do |dep, version|
           if AssetBender::ProjectsManager.project_exists? dep
             resolved_dep = AssetBender::ProjectsManager.get_project dep
+
           else
-            resolved_version = fetcher.resolve_version_for_project dep, version
-            resolved_dep = AssetBender::DependenciesManager.get_dependency dep, resolved_version
+            resolved_version = version.is_fixed? ? version : fetcher.resolve_version_for_project(dep, version)
+
+            if !resolved_version || !AssetBender::DependenciesManager.dependency_exists?(dep, resolved_version)
+              raise AssetBender::Error.new "Unknown dependency #{dep}, have you run update deps (and made sure all necessary dependencies are configured?)"
+            else
+              resolved_dep = AssetBender::DependenciesManager.get_dependency dep, resolved_version
+            end
           end
 
           @_resolved_dependencies << resolved_dep
         end
+
+        # Ensure all deps are resolved recursively (but don't include them in
+        # returned results)
+        @_resolved_dependencies.each do |dep|
+          dep.resolved_dependencies options
+        end
       end
+
 
       @_resolved_dependencies
     end

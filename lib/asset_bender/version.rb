@@ -53,7 +53,7 @@ module AssetBender
     end
 
     def url_format
-       format URL_OUTPUT_FORMAT
+       @proxy.format URL_OUTPUT_FORMAT
     end
     alias_method :path_format, :url_format
 
@@ -65,8 +65,12 @@ module AssetBender
       end
     end
 
-    def is_special_build_string
+    def is_special_build_string?
        @semver.nil?
+    end
+
+    def is_fixed?
+      !is_special_build_string? && !@semver.is_wildcard?
     end
 
     # Delegate the standard methods (minus to_s)
@@ -120,7 +124,7 @@ module AssetBender
       @version_string = ALIASES[version_string] || version_string
     end
 
-    def is_wildcard
+    def is_wildcard?
       true
     end
 

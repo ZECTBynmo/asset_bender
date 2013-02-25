@@ -8,7 +8,6 @@
     "dependencies": {
         "teh_project":          "1.7.x",
         "other_project":        "recommended",
-        "another_project":      "edge",
-        "yet_another_project":  "2.3.52"
+        "another_project":      "edge"
     }
 }

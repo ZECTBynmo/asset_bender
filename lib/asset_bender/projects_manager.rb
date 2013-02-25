@@ -11,7 +11,7 @@ module AssetBender
     attr_reader :served_projects_by_name,  # Also by alias if there is one
                 :jasmine_projects
 
-    # Load the global singleton that will be avialble as:
+    # Load the global singleton that will be availble as:
     #
     #    AssetBender::ProjectsManager.get_whatever_setting
     #

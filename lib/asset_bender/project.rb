@@ -42,9 +42,13 @@ module AssetBender
       config_file = project_config_path(path)
       logger.info "Loading project from file: #{config_file}"
 
-      begin
-        load_json_or_yaml_file config_file
-      rescue
+      if File.exists? config_file
+        begin
+          load_json_or_yaml_file config_file
+        rescue
+          raise AssetBender::ProjectLoadError, "Can't load project at #{path}, it it's component.json file is invalid"
+        end
+      else
         try_fallback_project_loaders path
       end
     end
@@ -57,9 +61,6 @@ module AssetBender
       elsif AssetBender::Config.allow_projects_without_component_json
         logger.warn "Couldn't load #{config_file}, but allowing since allow_projects_without_component_json is enabled"
         project_config = build_fake_config path
-
-      else
-        raise AssetBender::ProjectLoadError, "Can't load project at #{path}, it has no component.json file"
       end
 
       project_config

@@ -19,7 +19,7 @@ module AssetBender
     end
 
     def version_to_build
-      if @version.is_wildcard
+      if @version.is_wildcard?
         @version
       else
         raise AssetBender::VersionError.new "This project has a fixed version specified, so version_to_build doesn't make sense"
