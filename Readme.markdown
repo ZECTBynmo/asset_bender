@@ -1,17 +1,21 @@
-# HubSpot Static Daemon
+# The Legacy HubSpot Static Daemon
 
-This daemon is your personal all-in-one static asset machine. It slices, dices, compiles sass/coffeescript, concatenates files, and minifies — all in a nicely digestable (and synchronous) GET requests. Meaning there is no need for those silly watchers and the refresh-and-pray-the-preprocessor-is-finished behavior.
+This is the front-end server, dependency manager, and build tools used by HubSpot internally. 
+
+To learn more about it, please read this posts:
+
+  __Todo, reference the http://dev.hubspot.com/blog posts that are on their way...__
+
+_Note: in the current state, this code is quite specific to HubSpot's internals (and a bit of a mess). We are working on a much cleaner and extendable v2 called Asset Bender. That code is in-progress on the [future_branch](https://github.com/HubSpot/asset_bender/tree/future)_
 
 ## Installing
-
-If you setup your laptop with the workstation setup script, static3 is already ready to go (the repo is located at ~/dev/src/hubspot_static_daemon).
 
 1. Clone me!
 2. Install the latest version of ruby (1.9.3 as of right now). On a mac you can do that with `brew install ruby` or [rbenv](https://github.com/sstephenson/rbenv/). On linux, it is probably a simple apt-get or yum install away. And on windows, you'll probably have to download something or using that ick-y Cygwin mess :).
   - Note, you can get away with using 1.8.7 if you really need to, but it is _far_ slower. Like 50-100% slower in some cases. So it is worth it to install 1.9.3 now to save you time later.
 3. See if ruby gems have been installed by trying to run `gem list` (make sure that the ruby you just installed is on your path). If it isn't there, go out there and [get it](http://rubygems.org/pages/download).
 4. Install bundler with `gem install bundler`.
-5. CD into the directory where you cloned hubspot_static_daemon and run `bundle install` to install all the other necessary dependencies. (If you have trouble try `bundle install --without development`)
+5. CD into the directory where you cloned this repo and run `bundle install` to install all the other necessary dependencies. (If you have trouble try `bundle install --without development`)
 6. Stay in that directory and give it a whirl with `./hs-static run`.
 
 Common problems:
@@ -39,7 +43,7 @@ You can override (most) of the settings in `~/.hubspot/conf.yaml` by passing par
 
 The above configuration will automatically serve all the files contained withing the `static/` folder inside each of the projects specififed. But note, you must have at least one "asset" folder instead of `static/`, such as `js/`, `sass/`, `img/`, etc. Otherwise, it won't work.
 
-Here is the _highly_ recommended convention (these are the droids you are looking for):
+Here is the recommended convention (these are the droids you are looking for):
 
     project_name/
         static/
@@ -53,17 +57,17 @@ Here is the _highly_ recommended convention (these are the droids you are lookin
             ...       ->  Any other static folders you might need (fonts, documents, etc)
         ...           ->  All of your other project folders (could be django/java stuff 'er whatever)
 
-Note: you don't absolutely have to put all js files inside `js/` and all css files inside `css/`. It is ok if you drop them in your `coffee/` and `sass/` folders. In fact, if you just have a couple small js/css files and most of your code is in Coffeescript or SASS, then it is problably better to forego the `js/` and `css/` folders entirely. The static daemon has your back and will be able to figure all that stuff out.
+Note: you don't absolutely have to put all js files inside `js/` and all css files inside `css/`. It is ok if you drop them in your `coffee/` and `sass/` folders. In fact, if you just have a couple small js/css files and most of your code is in CoffeeScript or SASS, then it is probably better to forgo the `js/` and `css/` folders entirely. The static daemon has your back and will be able to figure all that stuff out.
 
 Though ideally you won't have too much old and busted js/css. PREPROCESS ALL THE THINGS!
 
-#### What about the style guide and such?
+#### What about the dependencies?
 
 You are now living in a world where projects have static dependencies, much like how python and java projects have dependencies. The way to fetch the latest static dependencies is to run `./hs-static update_deps`.
 
 That will look for a static_conf.json file (more on that later) in each the projects you've listed in `~/.hubspot/config.yaml`. It will use those to gather a list of all the static dependencies you haven't yet installed, download them from s3, and extract them to `~/.hubspot/static-archive`. And when you local server needs to access a dependency (that isn't currently being served as a static project), it will look up the right dependency via `static_conf.json` and the build pointers in `~/.hubspot/static-archive.
 
-I recommend getting into the habit of updating dependencies (every week-ish?).
+I recommend getting into the habit of updating dependencies occasionally (every week-ish?).
 
 #### Come on, can I hit it already?
 
@@ -75,26 +79,24 @@ Alright, alright. I know your HTTP verbs are getting anxious. All you need to do
 
 When you hit SASS/Coffeescript files, the daemon will check filesystem timestamps, automatically compile any necessary changes, and send the processed output directly to you. Similarly, when you hit a bundle file (see more info below) it will check for updates and deliver back the fully concatenated output.
 
-This means that the first time you fetch the style guide bundle or a bunch of SASS/Coffeescript, it might take a few seconds to respond. Don't fret, the rest should be super snappy.
-
 All other files will be passed along as expected.
 
-#### What about bundles
+#### What about bundles (concatenating files together)
 
-It's easy peasy. Just follow the directions on how to use [manifest files](http://guides.rubyonrails.org/asset_pipeline.html#manifest-files-and-directives). For example, meet my imaginary manifest file located at /marketing_awesomeness/static/coffee/best-evar.js:
+It's easy-peasy. Just follow the directions on how to use [manifest files](http://guides.rubyonrails.org/asset_pipeline.html#manifest-files-and-directives). For example, meet my imaginary manifest file located at /project_awesomeness/static/coffee/best-evar.js:
 
     //= require ./some-file.js
     //= require ./extras/some-other-file.coffee
     //= require_tree ./bunch-o-plugins/
-    //= require_directory style_guide/static/js/contrib/
+    //= require_directory other_project/static/js/contrib/
 
-This manifest file will join together some-file.js, the compiled output of extras/some-other-file.coffee, any js/coffee file contained in bunch-o-plugins/ (it's recursive), and any js/coffee file that is immediately inside the style_guide project's static/js/contrib/ folder.
+This manifest file will join together some-file.js, the compiled output of extras/some-other-file.coffee, any js/coffee file contained in bunch-o-plugins/ (it's recursive), and any js/coffee file that is immediately inside the other_project project's static/js/contrib/ folder.
 
-Fortunately for us, you will still see all of those files included individually while in development mode (with the help of some custom django/java magic). If you'd like to test things all nice and compressed/obsfuscated (like they are in production), just run the daemon like you have before, but add `-m compressed` option to the command.
+Fortunately for us, you will still see all of those files included individually while in development mode (with the help of some custom django magic). If you'd like to test things all nice and compressed/obfuscated (like they are in production), just run the daemon like you have before, but add `-m compressed` option to the command.
 
-Note: the ordering of files that come via require\_tree and require\_directory is simply alphabetical. So if you need to insure that some files come before others, just manually require those first. The following directives are smart and won't inlude any file twice.
+Note: the ordering of files that come via require\_tree and require\_directory is simply alphabetical. So if you need to insure that some files come before others, just manually require those first. The following directives are smart and won't include any file twice.
 
-Note #2: when requiring files or directories across project boundries, don't put a '/' in front of the project name. It will cause little teeny kittens to cry.
+Note #2: when requiring files or directories across project boundaries, don't put a '/' in front of the project name. It will cause little teeny kittens to cry.
 
 #### More about that hs-static command
 
@@ -117,12 +119,12 @@ Note #2: when requiring files or directories across project boundries, don't put
         -p, --static-project PROJECTS    Adds one or more static folders to watch (this paramater can be included multiple times).
                                          This overrides static_projects set in ~/.hubspot/config.yaml.
 
-        -a, --archive-dir DIR            Custom location of the static acrhive (defaults to ~/.hubspot/static-archive/)
+        -a, --archive-dir DIR            Custom location of the static archive (defaults to ~/.hubspot/static-archive/)
         -c, --clear-cache                Clear the asset cache on startup.
 
             --production-builds-only     Only use versions of dependencies that are deployed to production
 
-Note: only the basic commands and paramaters are listed above. `hs-static help` will list all commands and options (but you probably don't need to worry about most of them).
+Note: only the basic commands and parameters are listed above. `hs-static help` will list all commands and options (but you probably don't need to worry about most of them).
 
 ## Getting into the nitty-gritty
 
