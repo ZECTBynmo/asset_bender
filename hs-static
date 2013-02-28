@@ -1,0 +1,560 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+
+require 'bundler/setup'
+
+require 'optparse'
+require 'daemons'
+require 'fileutils'
+require File.expand_path(File.join(File.dirname(__FILE__), 'lib/hubspot_config'))
+
+
+PWD = File.expand_path(File.dirname(__FILE__))
+PIDS_DIR_PATH = File.join(PWD, 'pids')
+CURRENT_MODE_FILE_PATH = File.join(PWD, 'pids', 'hs-static-current-mode')
+
+options = {}
+
+opt_parser = OptionParser.new do |opt|
+  opt.banner = "Usage: hs_static COMMAND [OPTIONS]"
+  opt.separator  ""
+  opt.separator  "Commands"
+  opt.separator  "     start:       Start static server (in the background)"
+  opt.separator  "     run:         Start static server, but run in the forground (so you can see the log immediately)"
+  opt.separator  "     stop:        Stop static server"
+  opt.separator  "     restart:     Restart static server"
+  opt.separator  "     log:         Tail the server log (useful when you are running the server in the background)"
+  opt.separator  ""
+  opt.separator  "     precompile:              Precompiles assets to a target directory (does _not_ run the static server)."
+  opt.separator  "     precompile_assets_only:  Precompiles assets to a target directory (doesn't build bundle html or concatenate files)."
+  opt.separator  ""
+  opt.separator  "     update_deps:             Downloads the latest dependencies for a project."
+  opt.separator  ""
+  opt.separator  "     jasmine:     Runs jasmine tests for the projects specified via '-p'"
+  opt.separator  "     clean:       Convenience command that deletes everything in a target directory"
+  opt.separator  ""
+  opt.separator  "Options"
+
+  opt.on("-m", "--mode MODE", "Which mode, local, compressed, or precompiled?") do |mode|
+    options[:mode] = mode
+  end
+
+  opt.on("-t", "--target PRECOMPILED_FOLDER", "Specify the directory where you want precompiled assets to go. Required for the precompile and clean commands.") do |target_static_dir|
+    options[:target_static_dir] = target_static_dir
+  end
+
+  opt.on("-b", "--build-name BUILD_NAME", "Specify an build name while precompiling. Note that you must specify each as <project_name>:<build_name>") do |build_name|
+    parts = build_name.split ':'
+    raise "Each build name must inclue the project name and build name joined by a colon (eg. <project_name>:<build_name>), #{build_name} is invalid." unless parts.length == 2
+
+    project_name, build_name = parts
+
+    options[:build_names] ||= {}
+    options[:build_names][project_name] = build_name
+  end
+
+  opt.on("-p", "--static-project PROJECTS", "Adds one or more static folders to watch (this paramater can be included multiple times). This is in addition to static_projects set in ~/.hubspot/config.yaml.") do |static_project|
+    options[:static_projects] ||= []
+    options[:static_projects] << static_project
+  end
+
+  opt.on("-P", "--port PORT", "What port the static server runs on. This overrides the port set in ~/.hubspot/config.yaml.") do |port|
+    options[:port] = port
+  end
+
+  opt.on("-r", "--restrict PROJECT", "Only builds precompiled assets for a single project (the other projects are still used as dependencies).") do |restricted_project|
+    options[:restricted_project] = restricted_project
+  end
+
+  opt.on("-l", "--limit_to FILES", "Only precompiles the files listed (comma separated, no directories needed)") do |limit_to_files|
+    options[:limit_to_files] = limit_to_files
+  end
+
+  opt.on("-a", "--archive-dir DIR", "Custom location of the static acrhive (defaults to ~/.hubspot/static-archive/)") do |archive_dir|
+    options[:archive_dir] = archive_dir
+  end
+
+  opt.on("-e", "--extra-config CONFIG", "Fancy magical stuff... be wary.") do |extra_config|
+    options[:extra_config] = extra_config
+  end
+
+  opt.on("-c", "--clear-cache", "Clear the asset cache on startup.") do
+    options[:clear_cache] = true
+  end
+
+  opt.on("--production-builds-only", "Only use versions of dependencies that are deployed to production") do
+    options[:only_use_production_builds] = true
+
+    # Set it here so that the hubspot config instantiated in this process gets the config too
+    ENV['PROD_BUILDS_ONLY'] = '1'
+  end
+
+  opt.on("--temp CUSTOM_TEMP_FOLDER", "Specify a custom tmp folder") do |custom_temp_folder|
+    options[:custom_temp_folder] = custom_temp_folder
+  end
+
+  opt.on("--headless", "Flag to make jasmine tests run in a headless phantomjs browser") do
+    options[:headless] = true
+  end
+
+  opt.on("-h", "--help", "help") do
+    puts opt_parser
+  end
+end
+
+opt_parser.parse!
+
+
+def clean_up_mode_param(mode)
+   mode.downcase! 
+
+    case mode
+    when "dev", "development", "local" 
+        "development"
+    when "compressed"
+        "compressed"
+    when "precompiled", "precompile", "prod", "production"
+        "precompiled"
+    else              
+        raise "No such mode: #{mode}"
+    end
+end
+
+def write_current_mode(options)
+    Dir.mkdir PIDS_DIR_PATH unless File.directory?(PIDS_DIR_PATH)
+
+    File.open(CURRENT_MODE_FILE_PATH, 'w') do |f|
+        f.write(options[:mode])
+    end
+end
+
+def read_pid(path)
+    if File.exists? path
+        File.open path, 'r' do |f|
+            return f.read().strip
+        end
+    end
+end
+
+def kill_process_if_exists(pid, signal='SIGINT')
+    begin
+        Process.kill(signal, pid.to_i)
+    rescue Errno::ESRCH
+        puts "No such process exists: #{pid}"
+    else
+        puts "Killed process: #{pid}"
+    end
+end
+
+def process_exists?(pid)
+    return false unless pid
+
+    begin
+        Process.kill(0, pid.to_i)
+    rescue Errno::ESRCH
+        false
+    else
+        true
+    end
+end
+
+def delete_current_mode
+    FileUtils.rm(CURRENT_MODE_FILE_PATH) if File.exists? CURRENT_MODE_FILE_PATH
+end
+
+def get_current_mode
+    if File.exists? CURRENT_MODE_FILE_PATH
+        File.open CURRENT_MODE_FILE_PATH, 'r' do |f|
+            return f.read()
+        end
+    end
+end
+
+def command_pid_path
+    File.join(PWD, 'pids', 'hs-static-server.pid')
+end
+
+def server_pid_path
+    File.join(PWD, 'tmp', 'pids', 'server.pid')
+end
+
+def get_pids
+    pid_to_kill = read_pid command_pid_path
+    server_pid_to_kill = read_pid server_pid_path
+
+    return pid_to_kill, server_pid_to_kill
+end
+
+def delete_command_pid
+    FileUtils.rm(command_pid_path) if File.exists? command_pid_path
+end
+
+def delete_server_pid
+    FileUtils.rm(server_pid_path) if File.exists? server_pid_path
+end
+
+def check_if_already_running
+    current_mode = get_current_mode
+    command_pid, server_pid = get_pids
+
+    command_process_exists = process_exists? command_pid
+    server_process_exists = process_exists? server_pid
+
+    if current_mode and (command_process_exists or server_process_exists)
+        puts "The static daemon is already running (in #{current_mode} mode), you should stop or restart it."
+        Process.exit
+    else
+        # Delete any leftovers (eg. a "run" daemon that was killed with ctrl-c)
+        delete_current_mode
+        delete_command_pid
+        delete_server_pid
+    end
+end
+
+def shared_config_var(options)
+    vars = ''
+
+    if options[:extra_config]
+        config_string = options[:extra_config]
+        config_string.gsub!(/\\|"/) { |c| "\\#{c}" }
+
+        vars += " EXTRA_CONFIG=\"#{config_string}\""
+    end
+
+    vars += " ARCHIVE_DIR=\"#{options[:archive_dir]}\"" if options[:archive_dir]
+    vars += " PROD_BUILDS_ONLY=1" if options[:only_use_production_builds]
+    vars += " CUSTOM_TEMP_DIR=#{options[:custom_temp_folder]}" if options[:custom_temp_folder]
+    vars += " PORT=#{options[:port]}" if options[:port]
+    vars
+end
+
+def run_mode_vars(options)
+    mode = options[:mode]
+    target = options[:target_static_dir]
+
+    extra_vars = 'RUN_FROM_SCRIPT=1 '
+    extra_vars += " " + shared_config_var(options)
+
+    if mode == "precompiled" and target
+        extra_vars += "TARGET_STATIC_FOLDER=\"#{target}\" "
+
+    elsif mode == "precompiled" and not target
+        raise "You must specify a target static directory (--target) when in the precompiled mode"
+    end
+
+    extra_vars
+end
+
+def static_projects_var(options)
+    return '' unless options[:static_projects]
+
+    comma_separated_projects = options[:static_projects].join(', ')
+    "HUBSPOT_STATIC_PROJECTS=\"#{comma_separated_projects}\" "
+end
+
+
+def start(options, daemon_options)
+    write_current_mode options
+
+    hubspot_config = HubspotConfig.new
+    port = options[:port] || hubspot_config.port
+    puts "Starting static daemon on :#{port}"
+    $stdout.flush
+
+    extra_vars = run_mode_vars(options)
+    extra_vars += " " + static_projects_var(options)
+
+    application = Daemons.run_proc "hs-static-server", daemon_options do
+        exec "cd #{PWD}; #{extra_vars} rails server -d -p #{port}"
+    end
+end
+
+def run(options, daemon_options)
+    daemon_options[:ontop] = true
+    write_current_mode options
+
+    extra_vars = run_mode_vars options
+    extra_vars += " " + static_projects_var(options)
+
+    hubspot_config = HubspotConfig.new
+    port = options[:port] || hubspot_config.port
+        
+    application = Daemons.run_proc "hs-static-server", daemon_options do
+        exec "cd #{PWD}; #{extra_vars} rails server -p #{port}"
+    end
+end
+
+def log(current_mode)
+    log_path = File.join(PWD, 'log', "#{current_mode}.log")
+    exec "tail -f #{log_path}"
+end
+
+def stop(current_mode)
+    pid_to_kill, server_pid_to_kill = get_pids
+
+    if server_pid_to_kill
+        kill_process_if_exists server_pid_to_kill, 9
+        delete_server_pid
+    end
+
+    if pid_to_kill
+        kill_process_if_exists pid_to_kill
+        delete_command_pid
+    end
+
+    delete_current_mode
+end
+
+def precompile_vars(options)
+    mode = options[:mode]
+    restricted_project = options[:restricted_project]
+    limit_to_files = options[:limit_to_files]
+    target = File.expand_path(options[:target_static_dir])
+    build_names = options[:build_names]
+
+    extra_vars = static_projects_var(options)
+    extra_vars += " " + shared_config_var(options)
+    extra_vars += " RESTRICT_TO=\"#{restricted_project}\"" if restricted_project
+    extra_vars += " LIMIT_TO=\"#{limit_to_files}\"" if limit_to_files
+    extra_vars += " TARGET_STATIC_FOLDER=\"#{target}\""
+    extra_vars += " RAILS_ENV=#{mode} "
+
+    if build_names
+        # Convert to <name>:<build>,<name2>:<build2>,...
+        build_name_string = build_names.map { |x,y| x + ':' + y }.join(',')
+
+        extra_vars += " BUILD_NAMES=#{build_name_string}"
+    end
+
+    extra_vars
+end
+
+def precompile_assets_only(options)
+    vars = precompile_vars(options)
+
+    unless system "#{vars} INGNORE_BUNDLE_DIRECTIVES=1 bundle exec ruby script/precompile_project_assets_and_munge_build_names.rb"
+       raise "Error procompiling assets"
+    end
+end
+
+def precompile(options)
+    vars = precompile_vars(options)
+
+    unless system "#{vars} bundle exec ruby script/precompile_project_assets_plus.rb"
+        raise "Error procompiling assets and bundle html"
+    end
+end
+
+def clean(options)
+    target = File.expand_path(options[:target_static_dir])
+
+    s = ''
+    while not ["y", "n"].include? s
+        print "Remove everything inside the #{target} folder? [Yn] "
+        s = $stdin.gets.chomp.downcase
+    end
+
+    if s == "y"
+        exec "rm -rf #{target}/*"
+    end
+end
+
+def clear_cache_if_needed(options)
+    clear_cache if options[:clear_cache]
+end
+
+def clear_cache
+    puts "\nClearing the static cache..."
+    system "rm -rf #{PWD}/tmp/cache"
+end
+
+def update_dependiences(options)
+
+    # HACK :(
+    ENV['SKIP_GATHERING_LOCAL_BUILD_NAMES'] = '1'
+
+    hubspot_config = HubspotConfig.new  
+    local_archive = hubspot_config.local_static_archive
+
+    projects = options[:static_projects] || hubspot_config.static_project_paths
+    raise "No projects specified (use \"-p\" or add to static_projects in ~/.hubspot/conf.yaml)" unless projects
+
+    begin
+        projects.each do |project|
+            local_archive.update_dependencies_for project, { :served_projects_paths_set => Set.new(projects) }
+        end
+    rescue ArchiveDownloadError
+        puts "\nHTTP errors when downloading dependencies!"
+    rescue
+        puts "\nUnknown errors when downloading dependencies!\n"
+        raise
+    end
+end
+
+def run_jasmine_tests(options)
+    hubspot_config = HubspotConfig.new options
+    port = options[:port] || hubspot_config.port
+
+    headless = options[:headless] or false
+    base_jasmine_path = hubspot_config.served_projects_path_map['jasmine']
+
+    # Get the dep path if it isn't served locally
+    unless base_jasmine_path
+        base_jasmine_path = hubspot_config.served_dependency_path_map['jasmine']
+    end
+
+    unless base_jasmine_path
+        abort('Jasmine must be a dependecy for the projects you want to test (and remember to updates-deps and restart hs-static after adding that dep)')
+    end
+
+
+    if options[:restricted_project]
+        projects_to_test = [options[:restricted_project]]
+    else
+        projects_to_test = hubspot_config.static_projects_with_specs
+    end
+
+    projects_to_test.each do |project|
+        project_alias = hubspot_config.aliased_project_name(project)
+
+        jasmine_path = "#{base_jasmine_path}/static/"
+
+        # Interpolate jasmine build version (if jasmine isn't being served locally)
+        if not hubspot_config.static_project_names.include? 'jasmine'
+            jasmine_version = (hubspot_config.dependencies_for[project_alias] || {})['jasmine']
+
+            unless jasmine_version
+                abort("Jasmine must be a dependecy for the #{project} (and remember to updates-deps and restart hs-static after adding that dep)")
+            end
+
+            jasmine_path.gsub! '/static/', "/#{jasmine_version}/"
+        end
+
+        # If running a headless test during a build on jenkins
+        if headless && options[:mode] == 'precompiled'
+            project_path = hubspot_config.served_projects_path_map[project]
+
+            spec_prefix = "#{options[:target_static_dir]}/#{project}/static/test/"
+            spec_prefix.gsub! '/static/', "/static-#{options[:build_names][project]}/" if options[:build_names] and options[:build_names][project]
+
+            require File.expand_path(File.join(File.dirname(__FILE__), 'lib/hubspot_static_deps'))
+
+            # Grab the latest jasmine version on s3
+            static_deps = StaticDependencies::build_from_filesystem(project_path)
+            jasmine_version = static_deps.fetch_latest_static_build_name_for_project('jasmine')
+            jasmine_url_prefix = "http://#{DEFAULT_STATIC_DOMAIN}/jasmine/#{jasmine_version}/"
+            print "Trying url #{jasmine_url_prefix} for jasmine\n"
+            color_logs = false
+
+            path = "#{jasmine_url_prefix}test/ProjectSpecRunnerHeadless.html?project=#{project}"
+
+            puts "Running precompiled headless specs for #{project}:"
+
+            # So this runs phantonjs:
+            #  - on a file in the jasmine project on the filesystem
+            #  - using the lastest jasmine build on s3
+            #  - against the spcs that are already precompiled from the build prcoess
+            cmd = "phantomjs #{jasmine_path}js/run_jasmine_test.coffee #{path} #{jasmine_url_prefix} #{spec_prefix} #{color_logs}"
+            print "\n", "cmd:  #{cmd.inspect}", "\n\n"
+            exec cmd
+
+        # If running a headless test locally
+        elsif headless
+            url = "http://localhost:#{port}/jasmine/static/test/ProjectSpecRunnerHeadless.html?project=#{project}"
+            puts "Running headless specs for #{project}: #{url}"
+
+            local_jasmine_location = "http://localhost:#{port}/jasmine/static/"
+            local_spec_location = "http://localhost:#{port}/#{project}/static/test/"
+
+            cmd = "phantomjs #{jasmine_path}js/run_jasmine_test.coffee #{url} #{local_jasmine_location} #{local_spec_location}"
+            print "\n", "cmd:  #{cmd.inspect}", "\n\n"
+            exec cmd
+
+        # If running tests in browser locally
+        else
+            url = "http://localhost:#{port}/jasmine/static/test/ProjectSpecRunner.html?project=#{project}"
+            puts "Opening jasmine spec runner: #{url}"
+
+            pid = spawn "open #{url}"
+            Process.detach pid
+        end
+    end
+end
+    
+
+ENV['RAILS_ENV'] = options[:mode] = clean_up_mode_param(options[:mode] || 'local')
+
+daemon_options = {
+    :app_name   => "hs-static-server",
+    # :ARGV       => ['start', '-f', '--', 'param_for_myscript']
+    :dir_mode   => :script,
+    :dir        => 'pids',
+    :multiple   => false,
+    :ontop      => false,
+    :mode       => :load,
+    # :backtrace  => true,
+    # :monitor    => true
+}
+
+case ARGV[0]
+when "start"
+    clear_cache_if_needed options
+
+    check_if_already_running
+    start options, daemon_options
+when "run"
+    clear_cache_if_needed options
+    
+    check_if_already_running
+    run options, daemon_options
+when "log"
+    log get_current_mode()
+when "stop"
+    stop get_current_mode()
+when "restart"
+    clear_cache_if_needed options
+    
+    stop get_current_mode()
+    start options, daemon_options
+when "precompile_assets_only", "precompile-assets-only"
+    clear_cache_if_needed options
+    
+    if options[:target_static_dir]
+        precompile_assets_only options
+    else
+        puts "You must specify a target directory when precompiling! (via -t or --target)"
+    end
+when "precompile_without_bundle_html", "precompile-without-bundle-html"
+    clear_cache_if_needed options
+    
+    if options[:target_static_dir]
+        precompile_project_assets_and_munge_build_names options
+    else
+        puts "You must specify a target directory when precompiling! (via -t or --target)"
+    end
+when "precompile"
+    clear_cache_if_needed options
+    
+    if options[:target_static_dir]
+        precompile options
+    else
+        puts "You must specify a target directory when precompiling! (via -t or --target)"
+    end
+when "clean"
+    if options[:target_static_dir]
+        clean options
+    else
+        puts "You must specify a target directory when cleaning precompiled assets! (via -t or --target)"
+    end
+when "update_deps", "update-deps"
+    # Force cache clear
+    clear_cache
+
+    update_dependiences options
+when "jasmine"
+    run_jasmine_tests options
+else
+    puts opt_parser
+end
+
