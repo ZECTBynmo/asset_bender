@@ -12,6 +12,7 @@ If you'd like to see or try out the fully-functional legacy version (that is sti
 
 <img src="http://cl.ly/image/0J1G0v1T0I3u/Index%20page%20mockup.png" width=500>
 
+
 ### Installing
 
 __Todo, more instructions...__
@@ -23,3 +24,8 @@ Right now to run you'll need these forked gems:
  - https://github.com/timmfin/sprocket-tribe
 
 And you can start the server with `rerun --dir lib,config rackup`
+
+
+### Related
+
+__Todo, link to django runtime repo when pushed...__
