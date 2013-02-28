@@ -8,6 +8,9 @@ Asset Bender is a package/dependency manager, local server, and build tools for 
 
 If you'd like to see or try out the fully-functional legacy version (that is still somewhat coupled to HubSpot internals), check out the [master branch](https://github.com/HubSpot/asset_bender/tree/master).
 
+### Preview
+
+<img src="http://cl.ly/image/0J1G0v1T0I3u/Index%20page%20mockup.png" width=500>
 
 ### Installing
 
