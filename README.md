@@ -16,13 +16,7 @@ If you'd like to see or try out the fully-functional legacy version (that is sti
 
 ### Installing
 
-__Todo, more instructions...__
-
-Right now to run you'll need these forked gems:
- 
- - https://github.com/timmfin/hike-tribe
- - https://github.com/timmfin/semver
- - https://github.com/timmfin/sprocket-tribe
+`bundle install` away!
 
 And you can start the server with `rerun --dir lib,config rackup`
 
