@@ -3,6 +3,7 @@
 require 'bundler/setup'
 require 'gli'
 require 'sprockets'
+require 'compass'
 require 'sprockets-sass'
 require 'sprockets-helpers'
 
