@@ -14,10 +14,10 @@ GIT
 
 GIT
   remote: git://github.com/timmfin/sprocket-tribe.git
-  revision: 5112012d559d34d5e3639daec21df34536ee5c5d
+  revision: d3e375898ad268bd43aa04b4021c027cdc27fea7
   branch: master
   specs:
-    sprockets (2.8.2)
+    sprockets (2.9.3)
       hike (~> 1.2)
       multi_json (~> 1.0)
       rack (~> 1.0)
@@ -48,6 +48,7 @@ GEM
       multi_json (~> 1.0)
     fssm (0.2.10)
     git (1.2.5)
+    gli (2.5.6)
     multi_json (1.6.1)
     rack (1.5.2)
     rack-protection (1.3.2)
@@ -107,6 +108,7 @@ DEPENDENCIES
   compass (~> 0.12.2)
   execjs
   git
+  gli
   hike!
   rspec
   sass (~> 3.2.5)
