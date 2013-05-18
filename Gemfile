@@ -10,9 +10,10 @@ gem 'slim'
 gem 'actionpack'
 gem 'git'
 
-gem 'execjs'
 gem 'sass', "~> 3.2.5"
 gem 'compass', "~> 0.12.2"
+
+gem 'execjs'
 gem 'coffee-script'
 gem "coffee-script-source", "~> 1.4.0"
 
@@ -22,8 +23,11 @@ gem 'sprockets', :github => 'timmfin/sprocket-tribe', :branch => 'master'
 gem 'hike', :github => 'timmfin/hike-tribe', :branch => 'master'
 
 gem 'sprockets-sass'
+gem 'sprockets-helpers'
 
 gem 'semver-tribe', :github => 'timmfin/semver', :branch => 'master'
+
+gem 'json', '~> 1.7.7'
 
 group :development do
 end
