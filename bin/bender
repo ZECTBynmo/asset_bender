@@ -21,6 +21,7 @@ program_desc 'Asset Bender'
 # pre do |global_options,command,options,args|
 #   $todo_list = Hacer::Todolist.new(global_options[:tasklist])
 # end
+
  
 desc 'Precompiles project'
 long_desc 'Compiles all of the files in a project.'
@@ -29,9 +30,6 @@ command :precompile do |c|
   c.flag [:o,:output]
 
   c.action do |global_options, options, args|
-    # print "\n", "global_options:  #{global_options.inspect}", "\n\n"
-    print "\n", "options:  #{options.inspect}", "\n\n"
-    print "\n", "args:  #{args.inspect}", "\n\n"
 
     help_now!('Must include path to precompile') if args.empty?
     help_now!('Must include output directory') unless options[:output]
