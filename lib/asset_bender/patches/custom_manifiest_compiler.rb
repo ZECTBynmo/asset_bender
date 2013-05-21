@@ -7,9 +7,21 @@ module Sprockets
       end
 
       paths = environment.each_logical_path.to_a
-      paths = paths.select { |path| path if path.start_with? prefix }
 
-      print "\n", "paths:  #{paths.inspect}", "\n\n"
+      # Only include paths that start with the passed in prefix
+      paths = paths.select { |path| true if path.start_with? prefix }
+
+      # Skip all files without extensions, see
+      # https://github.com/sstephenson/sprockets/issues/347 for more info
+      paths = paths.select do |path|
+
+        if File.extname(path) == ""
+          logger.info "Skipping #{path} since it has no extension"
+          false
+        else
+          true
+        end
+      end
 
       paths.each do |path|
         if asset = find_asset(path)
