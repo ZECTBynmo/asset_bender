@@ -22,6 +22,8 @@ module AssetBender
       :info_filename,
     ]
 
+    attr_reader :options, :domain
+
     # Creates a new Fetcher instance, which is used to query your configured domain
     # for version numbers, build artifacts, etc. It is a class instead of methods
     # so you can share a  Fetcher object, and call fetch calls from it will be cached.
@@ -38,7 +40,7 @@ module AssetBender
 
       # Then use the passed in settings
       @options = @options.merge options
-
+      
       @has_cache = @options[:cache]
 
       # Normalize the base domain
@@ -114,10 +116,14 @@ module AssetBender
     end
 
     def resolve_version_for_project(project_or_dep_name, version_wildcard, func_options = nil)
-      Version.new fetch_build_for_project(project_or_dep_name, version_wildcard, func_options)
+      version_string = fetch_build_for_project(project_or_dep_name, version_wildcard, func_options)
+
+      raise AssetBender::Error.new "Couldn't resolve version for #{project_or_dep_name} #{version_wildcard}" unless version_string
+      Version.new version_string
     end
 
     def fetch_build_for_project(project_or_dep_name, version_wildcard, func_options = nil)
+      func_options ||= {}
       url = url_for_build_pointer project_or_dep_name, version_wildcard, func_options
 
       begin
@@ -125,6 +131,26 @@ module AssetBender
       rescue
         logger.warn $!
         resolved_dep_version_string = nil
+      end
+
+      # Attempt the fallback url if it exists
+      if not resolved_dep_version_string and not Config.url_for_build_pointer_fallback.nil?
+        begin
+          func_options[:fetcher] = self
+
+          fallback_url = Config.url_for_build_pointer_fallback.call project_or_dep_name, version_wildcard, func_options
+
+          if fallback_url && fallback_url == url
+            logger.info "Skipping fallback url since it matches the regular url exactly"
+          elsif fallback_url
+            logger.info "Resolved version via fallback url: #{fallback_url}" 
+            resolved_dep_version_string = fetch_url_with_retries(fallback_url).strip 
+          end
+        rescue
+          logger.info "Error fetching via fallback url: #{fallback_url}" 
+          logger.warn $!
+          resolved_dep_version_string = nil
+        end
       end
 
       if resolved_dep_version_string.nil? || resolved_dep_version_string.empty?

@@ -30,7 +30,7 @@ module AssetBender
         @recommended_version = @version.dup
       end
 
-      @dependencies_by_name = build_dependencies_by_name_with_semvers @config[:dependencies]
+      @dependencies_by_name = build_dependencies_by_name_with_semvers dependency_config
       @alias = nil
     end
 
@@ -73,8 +73,20 @@ module AssetBender
       }
     end
 
+    def dependency_config
+      @config[:dependencies]
+    end
+
     def dependency_names
       @dependencies_by_name.keys
+    end
+
+    def is_project
+      false
+    end
+
+    def is_dependency
+      false
     end
 
     private

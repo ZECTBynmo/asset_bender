@@ -19,8 +19,10 @@ module AssetBender
     # URL version format 'v1.2.3'
     URL_OUTPUT_FORMAT = 'v%M.%m.%p%s'
 
+
     # Other acceptable/legacy formats: 'v1.2.3', 'static-1.2'
-    ALTERNATE_FORMATS = ['v%M.%m.%p%s', 'static-%m.%p']
+    LEGACY_FORMAT_WITH_STATIC = 'static-%m.%p'
+    ALTERNATE_FORMATS = ['v%M.%m.%p%s', LEGACY_FORMAT_WITH_STATIC]
 
     # All acceptable formats together
     ALL_FORMATS = [FORMAT] + ALTERNATE_FORMATS

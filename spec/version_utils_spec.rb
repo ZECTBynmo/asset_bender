@@ -15,7 +15,7 @@ describe 'VersionUtils' do
   end
 
   it 'should create replacment regexes that work' do
-    assorted_verson_placeholders = [
+    assorted_version_placeholders = [
         'static',
         'version',
         'v',
@@ -25,7 +25,7 @@ describe 'VersionUtils' do
     ]
 
     @project_names.each do |project_name|
-      assorted_verson_placeholders.each do |placeholder|
+      assorted_version_placeholders.each do |placeholder|
         re = VersionUtils::project_replacement_regex project_name
         match = re.match "#{project_name}/#{placeholder}/"
 

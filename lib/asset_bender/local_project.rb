@@ -38,7 +38,7 @@ module AssetBender
     def check_for_spec_directory
       POSSIBLE_SPEC_DIRS.each do |dir|
         potential_spec_dir = File.join @path, dir
-        return @spec_dir = potential_spec_dir if File.directory? potential_spec_dir
+        return @spec_directory = potential_spec_dir if File.directory? potential_spec_dir
       end
     end
   end

@@ -25,8 +25,27 @@ module AssetBender
     end
 
     def self.load_from_file(path)
+      path = File.expand_path path
       project_config = load_config_from_file path
       self.new project_config, path
+    end
+
+    # Fetches the version for every single depenedency in this project.
+    # Returns a list of UnfulfilledDependency and/or LocalProject instances
+    def fetch_versions_for_dependencies(options = {})
+      results = []
+      fetcher = options[:fetcher] || AssetBender::Fetcher.new
+      
+      @dependencies_by_name.each do |dep_name, version|
+        if AssetBender::ProjectsManager.project_exists? dep_name
+          results << AssetBender::ProjectsManager.get_project(dep_name)
+        else
+          resolved_version = version.is_fixed? ? version : fetcher.resolve_version_for_project(dep_name, version)
+          results << AssetBender::UnfulfilledDependency.new(dep_name.to_s, resolved_version)
+        end
+      end
+
+      results
     end
 
     # Returns an array of project and/or dependency objects that represent match
@@ -34,26 +53,23 @@ module AssetBender
     #
     # Note, this is meomized and is only called once (unless the force_reresolve
     # option is passed)
-    def resolved_dependencies(options = nil)
-      options ||= {}
+    def resolved_dependencies(options = {})
       @_resolved_dependencies = nil if options[:force_reresolve]
-      fetcher = options[:fetcher] || AssetBender::Fetcher.new
 
       if @_resolved_dependencies.nil?
         @_resolved_dependencies = []
 
-        @dependencies_by_name.each do |dep, version|
-          if AssetBender::ProjectsManager.project_exists? dep
-            resolved_dep = AssetBender::ProjectsManager.get_project dep
+        unfulfilled_deps = fetch_versions_for_dependencies options
+
+        unfulfilled_deps.each do |dep_or_proj|
+          if dep_or_proj.is_a? LocalProject
+            resolved_dep = dep_proj
+
+          elsif !dep_or_proj.version || !AssetBender::DependenciesManager.dependency_exists?(dep_or_proj.name, dep_or_proj.version)
+            raise AssetBender::Error.new "Unknown dependency #{dep_name} #{resolved_version}, have you run update deps (and made sure all necessary dependencies are configured?)"
 
           else
-            resolved_version = version.is_fixed? ? version : fetcher.resolve_version_for_project(dep, version)
-
-            if !resolved_version || !AssetBender::DependenciesManager.dependency_exists?(dep, resolved_version)
-              raise AssetBender::Error.new "Unknown dependency #{dep}, have you run update deps (and made sure all necessary dependencies are configured?)"
-            else
-              resolved_dep = AssetBender::DependenciesManager.get_dependency dep, resolved_version
-            end
+            resolved_dep = AssetBender::DependenciesManager.get_dependency dep_or_proj.name, dep_or_proj.version
           end
 
           @_resolved_dependencies << resolved_dep
@@ -70,8 +86,20 @@ module AssetBender
       @_resolved_dependencies
     end
 
+    def locally_resolved_dependencies(options = nil)
+      print "\n", "locally_resolved_dependencies options:  #{options.inspect}", "\n\n"
+      options ||= {}
+      fetcher = options[:fetcher] || AssetBender::LocalFetcher.new
+
+      resolved_dependencies({ :fetcher => fetcher })
+    end
+
     def is_resolved?
       !@_resolved_dependencies.nil?
+    end
+
+    def is_project
+      true
     end
 
   end

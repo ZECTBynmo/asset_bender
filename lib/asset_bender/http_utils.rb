@@ -3,7 +3,14 @@ require 'uri'
 
 module AssetBender
   class FetchError < Error; end
-  class DownloadError < Error; end
+
+  class DownloadError < Error;
+    attr_reader :response
+
+    def initialize(response)
+      @response = response
+    end
+  end
 
   module HTTPUtils
 
@@ -60,36 +67,41 @@ module AssetBender
       raise exception
     end
 
+    def download_file(url, destination_path)
+        uri = URI.parse url
+        downloaded_file = open destination_path, "w"
+
+        was_error = false
+
+        begin
+            Net::HTTP.start(uri.host, uri.port) do |http|
+                http.request_get(uri.path) do |resp|
+                    raise AssetBender::DownloadError.new(resp) unless resp.kind_of? Net::HTTPSuccess
+
+                    resp.read_body do |segment|
+                        downloaded_file << segment
+                        sleep 0.005
+                    end
+                end
+            end
+
+            downloaded_file
+        rescue AssetBender::DownloadError => e
+            logger.error "Error downloading #{uri} (#{e.response.code}: #{e.response.message})!" 
+            was_error = true
+            raise
+        rescue
+            logger.error "Error downloading #{uri}"
+            logger.error $!
+            was_error = true
+            raise
+        ensure
+            downloaded_file.close()
+            File.delete downloaded_file if was_error
+        end
+    end
   end
 
-  def download_file(url, destination_path)
-      uri = URI.parse url
-      downloaded_file = open destination_path, "w"
-
-      begin
-          Net::HTTP.start(uri.host, uri.port) do |http|
-              http.request_get(uri.path) do |resp|
-                  raise AssetBender::DownloadError.new(resp) unless resp.kind_of? Net::HTTPSuccess
-
-                  resp.read_body do |segment|
-                      downloaded_file << segment
-                      sleep 0.005
-                  end
-              end
-          end
-
-          downloaded_file
-      rescue AssetBender::DownloadError => e
-          logger.error "Error downloading #{uri} ({e.response.code}: #{e.response.message}!" 
-          nil
-      rescue
-          logger.error "Error downloading #{uri}"
-          logger.error $!
-          nil
-      ensure
-          downloaded_file.close()
-      end
-  end
 
   class HTTPUtilsInstance
     include HTTPUtils

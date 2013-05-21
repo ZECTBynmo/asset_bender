@@ -28,7 +28,7 @@ module AssetBender
     def initialize(project_paths)
       projects = project_paths.map do |project_path|
         begin
-          LocalProject.load_from_file File.expand_path project_path
+          LocalProject.load_from_file project_path
         rescue AssetBender::ProjectLoadError => e
           logger.error e
           nil
@@ -36,6 +36,7 @@ module AssetBender
       end.compact
 
       @served_projects_by_name = {}
+      @jasmine_projects = Set.new
 
       projects.each do |project|
         names_and_aliases = [project.name]
@@ -64,14 +65,14 @@ module AssetBender
 
     # Returns whether the specified project is being locally served
     def project_exists?(project_name)
-      !@served_projects_by_name[project_name].nil?
+      !@served_projects_by_name[project_name.to_s].nil?
     end
 
     # Returns the project instance from the passed name (or alias)
     # Fails and raises an error if the project doesn't exist
     def get_project(project_name)
       raise AssetBender::UnknownProjectError.new "The #{project_name} project doesn't exists" unless project_exists? project_name
-      @served_projects_by_name[project_name]
+      @served_projects_by_name[project_name.to_s]
     end
 
     # Returns the project instance that represents the passed in path, by

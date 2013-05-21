@@ -41,7 +41,7 @@ module AssetBender
     # Returns a hash of dependency names to an array of versions available
     def available_dependencies_and_versions
       available_dependency_names.each_with_object({}) do |dep_name, result|
-        result = local_archive.available_versions_for_dependency dep_name
+        result = @local_archive.available_versions_for_dependency dep_name
       end
     end
 
@@ -56,6 +56,7 @@ module AssetBender
     end
 
     def dependency_exists?(dep_name, resolved_version)
+      print "\n", "looking for dep:  #{dep_name} #{resolved_version}", "\n\n"
       @local_archive.dependency_exists? dep_name, resolved_version
     end
 
@@ -64,6 +65,8 @@ module AssetBender
     # in the archive
     def get_dependency(dep_name, resolved_version)
       dependency = @local_archive.get_dependency dep_name, resolved_version
+      print "\n", "=================== dependency:  #{dependency.inspect}", "\n\n"
+
       raise AssetBender::UnknownDependencyError.new "The #{dep_name} #{resolved_version} dependency doesn't exists in your archive (do you need to update deps?)" unless dependency
       dependency
     end
@@ -75,7 +78,7 @@ module AssetBender
     # Returns nil if no dependecy with that version is found
     def get_dependency_from_path(url_or_path)
       name, version = VersionUtils::look_for_string_preceding_version_in_path url_or_path, available_dependency_names
-      local_archive.get_dependency name, version 
+      @local_archive.get_dependency name, version 
     end
 
     def get_project_or_dependency_from_path(url_or_path)

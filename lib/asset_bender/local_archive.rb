@@ -3,6 +3,8 @@ module AssetBender
 
   class LocalArchive
 
+    include UpdateArchiveMethods
+
     def initialize(path)
       raise AssetBender::Error.new "No archive path specified" unless path
 
@@ -53,16 +55,27 @@ module AssetBender
       end
     end
 
-    def archive_name(dependency)
-      resolved_version_string = dependency.resolved_version.url_format
-      "#{dependency.name}-#{resolved_version_string}-src.tar.gz"
+    def archive_name(dep)
+      resolved_version_string = dep.version.url_format
+      "#{dep.name}-#{resolved_version_string}-src.tar.gz"
     end
 
     def archive_url(dep)
       archive_domain = AssetBender::Config.domain
       archive_prefix = AssetBender::Config.archive_url_prefix || ''
 
-      "#{archive_domain}/#{archive_prefix}/#{archive_name(dep)}"
+      url = "#{archive_domain}/#{archive_prefix}/#{archive_name(dep)}"
+      url = "http://#{url}" unless url.start_with? 'http'
+      url
+    end
+
+    def delete_dependency(dep)
+      path_to_delete = File.join @path, dep.name
+
+      if path_to_delete
+          puts "\tRemoving #{path_to_delete}/"
+          FileUtils.rm_r path_to_delete
+      end
     end
 
   end
