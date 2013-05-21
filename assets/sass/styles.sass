@@ -33,8 +33,8 @@ $darkBlue: #0c3c7e
 %container
     position: relative
     margin: 0 auto
-    min-width: 45rem
-    max-width: 55rem
+    min-width: 50rem
+    max-width: 60rem
     padding: 0 1.5rem
 
 
@@ -77,13 +77,13 @@ body
 // SHARED STYLES
 
 %base-header
-    margin-bottom: 1em
+    margin-bottom: 1.5em
 
     .wrap
         @extend %container
         padding:
-            top: .75em * 1/2
-            bottom: .75em * 1/2
+            top: .75em
+            bottom: .75em * .85
 
     color: $lightYellow
     text-shadow: 0 -1px 0 rgba(0, 0, 0, .15)
@@ -144,7 +144,7 @@ span.version, a.version
             font-size: 1.75em
             font-weight: 500
 
-            color: $darkOrangeRed
+            color: $darkerOrangeRed
 
         .version
             font-size: 1.75em
@@ -242,6 +242,8 @@ span.version, a.version
 
 
 .dependencies
+    margin-top: 3em
+
     > header
         @extend %dependency-header
 
@@ -252,12 +254,12 @@ span.version, a.version
 
     header > a
         +flex-section(33%)
-        font-size: 1em
         font-weight: 500
         color: $darkGreen
 
         h2
             margin: 0
+            font-size: 1.3em
 
     ul.versions
         +flex-section(33%)
