@@ -9,16 +9,21 @@ section.projects
         header
           a href="/#{project.name}/"
             h2.name = project.name
-            span.version = project.version
+            span.version = project.recommended_version
 
         - unless project.dependencies_by_name.empty?
           dl.deps
-            - for dep, version in project.dependencies_by_name
+            - for dep in project.locally_resolved_dependencies
                 dt.name
-                  a href="/#{dep}/" = dep
-                dd.version 
-                  span.requested = version.abbrev
-                  span.resolved = version.abbrev
+                  - if dep.is_project
+                    a.project href="/#{dep.name}/" = dep.name
+                  - else 
+                    a href="/#{dep.name}/" = dep.name
+                dd
+                  span.requested.version = project.dependencies_by_name[dep.name.to_sym].abbrev
+
+                  - if dep.is_dependency
+                    span.resolved.version = dep.version.abbrev
 
         a.path href="/#{project.name}/" = project.pretty_path
 
@@ -38,10 +43,15 @@ section.dependencies
         a href="/#{dependency_name}/"
           h2.name = dependency_name
 
-      ul
+      ul.versions
         - for version in versions do
           li
-            a href="/#{dependency_name}/#{version}/" = version
+            a.version href="/#{dependency_name}/#{version}/" = version
+
+      ul.dependees
+        - for project in dependencees_by_dep[dependency_name]
+          li
+            a.source-project href="/#{project.name}" = project.name
 
 
 

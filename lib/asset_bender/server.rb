@@ -4,6 +4,7 @@ require 'sinatra/base'
 
 require 'sprockets'
 require 'sprockets-sass'
+require 'sprockets-helpers'
 
 require 'sass'
 require 'compass'
@@ -39,6 +40,11 @@ module AssetBender
       ProjectsManager.available_projects.each do |project|
         sprockets.append_path project.path
       end
+
+      DependenciesManager.all_available_dependencies.each do |dep|
+        print "\n", "#{dep} path:  #{dep.path.inspect}", "\n\n"
+        sprockets.append_path dep.path
+      end
     end
 
     # error do
@@ -50,15 +56,20 @@ module AssetBender
     # end
 
     get '/' do
+      projects = ProjectsManager.available_projects.reject {|p| p.name == 'asset_bender_assets'}
+
       slim :projects, :locals => {
-        :projects => ProjectsManager.available_projects.reject {|p| p.name == 'asset_bender_assets'},
+        :projects => projects,
         :dependencies_by_version => DependenciesManager.available_dependencies_and_versions,
+        :dependencees_by_dep => DependenciesManager.dependees_by_dependency(projects),
       }
     end
 
     get '/bundle-?:verb?/:path' do
       is_extended = params[:extended]
       path = params[:path]
+
+      # TODO
     end
 
     get '/*/' do

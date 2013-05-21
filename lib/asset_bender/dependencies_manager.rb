@@ -22,10 +22,6 @@ module AssetBender
 
     def initialize(local_archive_path)
       @local_archive = AssetBender::LocalArchive.new local_archive_path
-
-      # local_archive.available_depedencies.each do |dependency|
-      #   @available_dependencies_by_name[dependencies] = dependency
-      # end
     end
 
     # Delegate class methods to singleton insance
@@ -40,9 +36,34 @@ module AssetBender
 
     # Returns a hash of dependency names to an array of versions available
     def available_dependencies_and_versions
-      available_dependency_names.each_with_object({}) do |dep_name, result|
-        result = @local_archive.available_versions_for_dependency dep_name
+      @versions_for_each_dep ||= available_dependency_names.each_with_object({}) do |dep_name, result|
+        result[dep_name] = @local_archive.available_versions_for_dependency dep_name
       end
+    end
+
+    # Returns an array of all dependencies in the archive (including multiple
+    # versions of the same dependency)
+    def all_available_dependencies
+      @all_deps ||= available_dependencies_and_versions.map do |dep_name, versions|
+        versions.map { |version| get_dependency dep_name, version}
+      end.flatten
+    end
+
+    # Returns a hash of 
+    def dependees_by_dependency(source_projects)
+      result = {}
+
+      source_projects.each do |project|
+        print "\n", "project:  #{project.inspect}", "\n\n"
+        print "\n", "project.locally_resolved_dependencies:  #{project.locally_resolved_dependencies({ :recurse => true }).inspect}", "\n\n"
+
+        project.locally_resolved_dependencies.each do |proj_dep|
+          result[proj_dep.name] ||= Set.new
+          result[proj_dep.name].add project
+        end
+      end
+
+      result
     end
 
     # Returns the project instance that represents the passed in path, by
@@ -56,7 +77,6 @@ module AssetBender
     end
 
     def dependency_exists?(dep_name, resolved_version)
-      print "\n", "looking for dep:  #{dep_name} #{resolved_version}", "\n\n"
       @local_archive.dependency_exists? dep_name, resolved_version
     end
 
@@ -65,7 +85,6 @@ module AssetBender
     # in the archive
     def get_dependency(dep_name, resolved_version)
       dependency = @local_archive.get_dependency dep_name, resolved_version
-      print "\n", "=================== dependency:  #{dependency.inspect}", "\n\n"
 
       raise AssetBender::UnknownDependencyError.new "The #{dep_name} #{resolved_version} dependency doesn't exists in your archive (do you need to update deps?)" unless dependency
       dependency

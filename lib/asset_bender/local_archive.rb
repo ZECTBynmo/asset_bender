@@ -24,7 +24,13 @@ module AssetBender
     end
 
     def available_dependencies
-      @dependency_names ||= Dir.glob("#{@path}/*/").map do |dir|
+      available_dependency_paths.map do |path|
+        File.basename path
+      end
+    end
+
+    def available_dependency_paths
+      @dependency_paths ||= Dir.glob("#{@path}/*/").map do |dir|
         dir unless Dir[dir].empty?
       end.compact
     end
@@ -36,8 +42,8 @@ module AssetBender
     def available_versions_for_dependency(dependency_name)
       raise AssetBender::UnknownDependencyError.new "No such known dependency #{dependency_name}. Check to see if the configured dependencies are correct and you have run the update-deps command" unless is_valid_dependency? dependency_name
 
-      Dir.glob(File.join(@path, dependency_name)).map do |dir|
-        AssetBender::Version.new dir
+      Dir.glob(File.join(@path, dependency_name, '*/')).map do |dir|
+        AssetBender::Version.new File.basename dir
       end
     end
 

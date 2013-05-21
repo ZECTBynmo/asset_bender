@@ -66,7 +66,7 @@ module AssetBender
             resolved_dep = dep_proj
 
           elsif !dep_or_proj.version || !AssetBender::DependenciesManager.dependency_exists?(dep_or_proj.name, dep_or_proj.version)
-            raise AssetBender::Error.new "Unknown dependency #{dep_name} #{resolved_version}, have you run update deps (and made sure all necessary dependencies are configured?)"
+            raise AssetBender::Error.new "Unknown dependency #{dep_or_proj}, have you run update deps (and made sure all necessary dependencies are configured?)"
 
           else
             resolved_dep = AssetBender::DependenciesManager.get_dependency dep_or_proj.name, dep_or_proj.version
@@ -87,11 +87,29 @@ module AssetBender
     end
 
     def locally_resolved_dependencies(options = nil)
-      print "\n", "locally_resolved_dependencies options:  #{options.inspect}", "\n\n"
       options ||= {}
       fetcher = options[:fetcher] || AssetBender::LocalFetcher.new
+      recurse = options[:recurse] || false
 
-      resolved_dependencies({ :fetcher => fetcher })
+      deps = resolved_dependencies({ :fetcher => fetcher })
+
+      if recurse
+        deps_to_recurse = deps.dup
+        deps = Set.new deps
+
+        while not deps_to_recurse.empty?
+          # Pop off the stack and add to the complete deps set if it doesn't already exist
+          current_dep = deps_to_recurse.shift
+          deps.add current_dep
+
+          # Appened all this dep's deps to the stack to recurse later
+          deps_to_recurse.concat current_dep.resolved_dependencies
+        end
+
+        deps = deps.to_a
+      end
+
+      deps
     end
 
     def is_resolved?

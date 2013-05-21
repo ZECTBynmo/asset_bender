@@ -11,7 +11,9 @@ $lightYellow: #f9fcc6
 
 $orange: #f29826
 $darkOrangeRed: #df7524
+$darkerOrangeRed: #D96000
 
+$lightGreen: #85AF55
 $green: #719954
 $darkGreen: #5d8741
 
@@ -94,10 +96,16 @@ body
         font-size: 2.25em
         line-height: 1
         display: inline
+        -webkit-font-smoothing: antialiased
 
     .desc
         display: inline
         margin-left: 1em
+
+
+span.version, a.version
+    letter-spacing: 1px
+
 
 %project-header
     @extend %base-header
@@ -113,6 +121,10 @@ body
     border: none
         bottom: solid 2px $darkGreen
 
+%base-project-name
+    display: inline
+    font-size: 1.75em
+    font-weight: 500
 
 // PROJECT INDEX STYLES
 
@@ -129,10 +141,10 @@ body
 
         .name
             display: inline
-
-            color: $darkOrangeRed
             font-size: 1.75em
             font-weight: 500
+
+            color: $darkOrangeRed
 
         .version
             font-size: 1.75em
@@ -157,17 +169,20 @@ body
         dt, dd
             margin: 0
             float: left
-            width: 10em
+            width: 11em
 
         dt
             clear: left
             margin-right: 1em
 
             a
-                color: $darkGreen
+                color: $lightGreen
 
                 &:after
                     content: ':'
+
+                &.project
+                    color: $darkerOrangeRed
 
         %dep-version
             float: left
@@ -180,11 +195,12 @@ body
 
         .resolved
             @extend %dep-version
-            width: 5em
-            color: $green
+            width: 6em
+            color: $lightGreen
 
             &:before
                 content: '→'
+                color: $orange
                 display: inline-block
                 width: 2em
 
@@ -212,9 +228,66 @@ body
 
 // DEPENDENCY INDEX STYLES
 
+%flex-container
+    @extend %container
+    +clearfix
+    clear: left
+
+%flex-section-styles
+    float: left
+
+=flex-section($width)
+    @extend %flex-section-styles
+    width: $width
+
+
 .dependencies
     > header
         @extend %dependency-header
+
+.dependency
+    @extend %flex-container
+    line-height: 2em
+    margin-bottom: .5em
+
+    header > a
+        +flex-section(33%)
+        font-size: 1em
+        font-weight: 500
+        color: $darkGreen
+
+        h2
+            margin: 0
+
+    ul.versions
+        +flex-section(33%)
+        +horizontal-list
+        color: $lightGreen
+
+        li a:after
+            content: ', '
+
+        li:last-child a:after
+            content: ''
+        a
+            color: $lightGreen
+
+    ul.dependees
+        +flex-section(33%)
+        +horizontal-list
+
+        &, a
+            color: #999
+
+        li:first-child:before
+            content: '… in '
+
+        li a:after
+            content: ', '
+
+        li:last-child a:after
+            content: ''
+
 
 
 // DIRECTORY INDEX STYLES
@@ -240,7 +313,7 @@ body > .directory
                 border-bottom: 1px solid $lightYellow
 
     &.is-depedency > header 
-        @extend %depedency-header
+        @extend %dependency-header
 
     .dirs-n-files
         @extend %container

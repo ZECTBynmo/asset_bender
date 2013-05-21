@@ -21,7 +21,7 @@ module AssetBender
 
       def pretty_path
         output = @path
-        output.sub /\/(Users|home)\/#{CurrentUser}\//i, '~/'
+        output.sub(/\/(Users|home)\/#{CurrentUser}\//i, '~/')
       end
     end
 

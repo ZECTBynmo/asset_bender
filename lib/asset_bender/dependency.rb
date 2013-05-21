@@ -12,6 +12,10 @@ module AssetBender
       true
     end
 
+    def is_project
+      false
+    end
+
     def dependency_config
       fixed_dependencies = @config[:fixed_dependencies]
 
