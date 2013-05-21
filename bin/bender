@@ -23,6 +23,55 @@ program_desc 'Asset Bender'
 # end
 
  
+desc 'Run'
+long_desc "Starts the Asset Bender server in the foreground. Output is logged to the terminal"
+
+command :run do |c|
+  c.action do |global_options, options, args|
+    AssetBender::Commands::Run.new.run
+  end
+end
+
+
+desc 'Start'
+long_desc "Starts the Asset Bender server in the background. The output is logged to #{File.join bender_path, 'log/'}"
+
+command :start do |c|
+  c.action do |global_options, options, args|
+    AssetBender::Commands::Start.new.run
+  end
+end
+
+
+desc 'Stop'
+long_desc "Stops the Asset Bender server, whether it currently in the foreground or background."
+
+command :stop do |c|
+  c.action do |global_options, options, args|
+    AssetBender::Commands::Stop.new.run
+  end
+end
+
+
+desc 'Restart'
+long_desc "Stops and then starts the Asset Bender server in the background."
+
+command :restart do |c|
+  c.action do |global_options, options, args|
+    AssetBender::Commands::Restart.new.run
+  end
+end
+
+
+desc 'Clear cache'
+long_desc "Clears the Asset Bender cache. You shouldn't need it, but it might help out if you think something is messed up."
+
+command :clear_cache do |c|
+  c.action do |global_options, options, args|
+    AssetBender::Commands::ClearCache.new.run
+  end
+end
+
 
 desc 'Update dependencies'
 long_desc 'Updates the dependencies for one more more projects. If no arguments are passed, every project in your configuration is updated. But you can also pass in one or more project names/paths to only update specific projects'

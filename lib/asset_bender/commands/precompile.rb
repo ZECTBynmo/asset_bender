@@ -14,6 +14,7 @@ module AssetBender
 
       def run
         setup_env({ :extra_projects => [@project_path] })
+        setup_sprockets
 
         manifest = Sprockets::Manifest.new(@sprockets.index, @output)
         manifest.compile_prefixed_files_without_digest "#{@project_name}/"
