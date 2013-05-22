@@ -149,7 +149,7 @@ module AssetBender
       tar_options += existing_dep_pointers_for(dep).map do |pointer|
         exclude_this_pointer = true
 
-        if 'edge' == pointer && dep.version > fetch_latest_version_version_for_dep(dep)
+        if 'edge' == pointer && dep.version > fetch_latest_version_for_dep(dep)
           exclude_this_pointer = false
 
         elsif /^latest-\d+$/ =~ pointer && dep.version > fetch_latest_major_version_for_dep(dep)

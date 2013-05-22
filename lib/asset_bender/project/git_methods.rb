@@ -10,7 +10,7 @@ module AssetBender
         begin
           @_git ||= Git.open @path
         rescue
-          logger.warn '#{@path} is not a git repo'
+          logger.warn "#{@path} is not a git repo"
           @_git = false
         end
       end

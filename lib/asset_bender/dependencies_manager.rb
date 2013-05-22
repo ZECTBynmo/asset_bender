@@ -54,9 +54,6 @@ module AssetBender
       result = {}
 
       source_projects.each do |project|
-        print "\n", "project:  #{project.inspect}", "\n\n"
-        print "\n", "project.locally_resolved_dependencies:  #{project.locally_resolved_dependencies({ :recurse => true }).inspect}", "\n\n"
-
         project.locally_resolved_dependencies.each do |proj_dep|
           result[proj_dep.name] ||= Set.new
           result[proj_dep.name].add project

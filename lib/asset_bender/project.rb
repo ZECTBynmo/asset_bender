@@ -98,8 +98,16 @@ module AssetBender
     def build_dependencies_by_name_with_semvers(dep_config)
       deps_with_semvers = {}
 
+      print "\n", "dep_config:  #{dep_config.inspect}", "\n\n"
+      print "\n", "deps_with_semvers:  #{dep_config.inspect}", "\n\n"
+
       (dep_config || {}).each_with_object(deps_with_semvers) do |(dep_name, ver_str), new_hash|
-        new_hash[dep_name] = AssetBender::Version.new ver_str
+        begin
+          new_hash[dep_name] = AssetBender::Version.new ver_str
+        rescue AssetBender::VersionError
+          logger.error "The #{dep_name} dependency of #{to_s} is invalid: #{ver_str}"
+          raise
+        end
       end
 
       deps_with_semvers

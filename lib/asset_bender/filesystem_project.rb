@@ -63,7 +63,7 @@ module AssetBender
 
         unfulfilled_deps.each do |dep_or_proj|
           if dep_or_proj.is_a? LocalProject
-            resolved_dep = dep_proj
+            resolved_dep = dep_or_proj
 
           elsif !dep_or_proj.version || !AssetBender::DependenciesManager.dependency_exists?(dep_or_proj.name, dep_or_proj.version)
             raise AssetBender::Error.new "Unknown dependency #{dep_or_proj}, have you run update deps (and made sure all necessary dependencies are configured?)"

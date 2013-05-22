@@ -3,6 +3,7 @@ require 'semver-tribe'
 module AssetBender
 
   class VersionError < Error; end
+  class NilVersionError < VersionError; end
 
   # Any kind of version in Asset Bender. That includes:
   #
@@ -28,6 +29,8 @@ module AssetBender
     ALL_FORMATS = [FORMAT] + ALTERNATE_FORMATS
 
     def initialize(version_string)
+      raise AssetBender::NilVersionError.new "Invalid nil version" if version_string.nil?
+
       if SpecialVersion.is_valid_version version_string
         @proxy = @special = SpecialVersion.new version_string
       else

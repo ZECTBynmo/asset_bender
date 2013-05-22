@@ -48,10 +48,11 @@ section.dependencies
           li
             a.version href="/#{dependency_name}/#{version}/" = version
 
-      ul.dependees
-        - for project in dependencees_by_dep[dependency_name]
-          li
-            a.source-project href="/#{project.name}" = project.name
+      - if dependencees_by_dep[dependency_name]
+        ul.dependees
+          - for project in dependencees_by_dep[dependency_name]
+            li
+              a.source-project href="/#{project.name}" = project.name
 
 
 

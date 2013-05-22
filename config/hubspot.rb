@@ -43,6 +43,9 @@ def convert_to_asset_bender_version(version_string)
 
   elsif version_string == 'current'
     'recommended'
+
+  else
+    version_string
   end
 end
 
@@ -57,6 +60,14 @@ AssetBender::Config.project_config_fallback = lambda do |path|
     static_conf = load_json_or_yaml_file File.join path, "static_conf.json"
   else
     static_conf = load_json_or_yaml_file File.join path, "static/static_conf.json"
+  end
+
+  if File.exist? File.join path, "prebuilt_recursive_static_conf.json"
+    prebuilt_static_conf = load_json_or_yaml_file File.join path, "prebuilt_recursive_static_conf.json"
+  elsif File.exist? File.join path, "prebuilt_recursive_static_conf.json"
+    prebuilt_static_conf = load_json_or_yaml_file File.join path, "static/prebuilt_recursive_static_conf.json"
+  else
+    prebuilt_static_conf = nil
   end
 
   result = {
@@ -80,6 +91,12 @@ AssetBender::Config.project_config_fallback = lambda do |path|
     result[:version] = built_version.to_s
   end
 
+  # If this is a prebuilt src archive or prebuilt_recursive_static_conf.json
+  if prebuilt_static_conf
+    # Move all prebuilt deps to fixed_dependencies 
+    result[:fixed_dependencies] = prebuilt_static_conf[:deps]
+  end
+
   result
 end
 
@@ -91,7 +108,7 @@ AssetBender::Config.url_for_build_pointer_fallback = lambda do |project_name, ve
     version_pointer = "current"
 
   elsif version.is_wildcard?
-    version_pointer = "latest-version-#{version.major}"
+    version_pointer = "latest-version-#{version.minor}"
   end
 
   if version_pointer != 'edge' && !func_options[:force_production] && fetcher.options[:environment] != :production
