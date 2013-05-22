@@ -4,7 +4,10 @@ This is the front-end server, dependency manager, and build tools used by HubSpo
 
 To learn more about it, please read this posts:
 
-  __Todo, reference the http://dev.hubspot.com/blog posts that are on their way...__
+ - [HubSpot front-end development at scale](http://dev.hubspot.com/blog/frontend-development-at-scale-1)
+ - [HubSpot front-end development at scale part 2](http://dev.hubspot.com/blog/front-end-development-2)
+  
+  __Todo, reference the other http://dev.hubspot.com/blog posts that are on their way...__
 
 _Note: in the current state, this code is quite specific to HubSpot's internals (and a bit of a mess). We are working on a much cleaner and extendable v2 called Asset Bender. That code is in-progress on the [future branch](https://github.com/HubSpot/asset_bender/tree/future)_.
 
