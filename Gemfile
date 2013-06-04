@@ -24,10 +24,13 @@ gem 'hike', :github => 'timmfin/hike-tribe', :branch => 'master'
 
 gem 'sprockets-sass'
 gem 'sprockets-helpers'
+gem 'sprockets-derailleur', :github => 'timmfin/sprockets-derailleur', :branch => 'customizations'
 
 gem 'semver-tribe', :github => 'timmfin/semver', :branch => 'master'
 
 gem 'json', '~> 1.7.7'
+
+gem 'ruby-prof'
 
 group :development do
 end

@@ -88,12 +88,13 @@ desc 'Precompiles project'
 long_desc 'Compiles all of the files in a project to a target directory.'
 
 command :precompile do |c|
-  c.flag [:t,:target]
+  c.flag [:o, :output]
+  c.flag [:p, :processes]
 
   c.action do |global_options, options, args|
 
     help_now!('Must include path to precompile') if args.empty?
-    help_now!('Must include target directory') unless options[:target]
+    help_now!('Must include output directory') unless options[:output]
 
     bender_command = AssetBender::Commands::Precompile.new global_options, options, args
     bender_command.run 

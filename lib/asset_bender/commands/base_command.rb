@@ -24,12 +24,17 @@ module AssetBender
 
         AssetBender::Config.load_all_base_config_files
 
-        ProjectsManager.setup Config.local_projects + env_options[:extra_projects]
+        projects = Set.new Config.local_projects || []
+        projects += env_options[:extra_projects]
+
+        print "\n", "projects:  #{projects.inspect}", "\n\n"
+
+        ProjectsManager.setup projects
         DependenciesManager.setup Config.archive_dir
       end
 
       def setup_sprockets
-        @sprockets = Sprockets::Environment.new(bender_root, { :must_include_parent => true })
+        @sprockets = AssetBender::Setup.setup_sprockets
 
         ProjectsManager.available_projects.each do |project|
           @sprockets.append_path project.path

@@ -169,7 +169,6 @@ local_projects:
 #  - ~/dev/src/bla
 #  - ~/dev/src/somewhere/else/foobar
 
-
 # Optional
 # port: 3333
 

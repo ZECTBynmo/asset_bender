@@ -13,6 +13,9 @@ module AssetBender
   require "asset_bender/proc_utils"
   require "asset_bender/update_archive_methods"
 
+  def self.root
+    File.expand_path(File.join(__FILE__, '../../'))
+  end
 
   autoload :ProjectsManager,             "asset_bender/projects_manager"
   autoload :DependenciesManager,         "asset_bender/dependencies_manager"
@@ -29,6 +32,9 @@ module AssetBender
   autoload :Version,                     "asset_bender/version"
   autoload :Fetcher,                     "asset_bender/fetcher"
   autoload :LocalFetcher,                "asset_bender/local_fetcher"
-  autoload :Config,                      "asset_bender/config"
   autoload :Directory,                   "asset_bender/directory"
+
+  autoload :Config,                      "asset_bender/config"
+  autoload :Setup,                       "asset_bender/setup"
+
 end
