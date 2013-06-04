@@ -19,15 +19,14 @@ module AssetBender
         File.expand_path(File.join(__FILE__, '../../'))
       end
 
-      def setup_env(env_options = {})
+      def setup_command_env(env_options = {})
         env_options[:extra_projects] ||= []
 
         AssetBender::Config.load_all_base_config_files
+        AssetBender::Setup.setup_env @global_options
 
         projects = Set.new Config.local_projects || []
         projects += env_options[:extra_projects]
-
-        print "\n", "projects:  #{projects.inspect}", "\n\n"
 
         ProjectsManager.setup projects
         DependenciesManager.setup Config.archive_dir

@@ -1,5 +1,6 @@
 require "custom_singleton"
 require "flexible_config"
+require "string_inquirer"
 
 module AssetBender
   VERSION = "0.1.0"

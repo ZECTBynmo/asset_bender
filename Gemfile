@@ -17,7 +17,8 @@ gem 'execjs'
 gem 'coffee-script'
 gem "coffee-script-source", "~> 1.4.0"
 
-gem 'uglifier', '>= 1.2'
+gem "yui-compressor", "~> 0.9.6"
+gem 'uglifier', '>= 2.1.0'
 
 gem 'sprockets', :github => 'timmfin/sprocket-tribe', :branch => 'master'
 gem 'hike', :github => 'timmfin/hike-tribe', :branch => 'master'

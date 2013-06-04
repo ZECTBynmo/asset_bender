@@ -16,7 +16,7 @@ require 'asset_bender/commands'
 include GLI::App
 program_desc 'Asset Bender'
  
-# flag [:t,:tasklist], :default_value => File.join(ENV['HOME'],'.todolist')
+flag [:m, :mode], :default_value => "development"
  
 # pre do |global_options,command,options,args|
 #   $todo_list = Hacer::Todolist.new(global_options[:tasklist])
@@ -28,7 +28,7 @@ long_desc "Starts the Asset Bender server in the foreground. Output is logged to
 
 command :run do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Run.new.run
+    AssetBender::Commands::Run.new.run global_options, options, args
   end
 end
 
@@ -38,7 +38,7 @@ long_desc "Starts the Asset Bender server in the background. The output is logge
 
 command :start do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Start.new.run
+    AssetBender::Commands::Start.new.run global_options, options, args
   end
 end
 
@@ -48,7 +48,7 @@ long_desc "Stops the Asset Bender server, whether it currently in the foreground
 
 command :stop do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Stop.new.run
+    AssetBender::Commands::Stop.new.run global_options, options, args
   end
 end
 
@@ -58,7 +58,7 @@ long_desc "Stops and then starts the Asset Bender server in the background."
 
 command :restart do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Restart.new.run
+    AssetBender::Commands::Restart.new.run global_options, options, args
   end
 end
 
@@ -68,7 +68,7 @@ long_desc "Clears the Asset Bender cache. You shouldn't need it, but it might he
 
 command :clear_cache do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::ClearCache.new.run
+    AssetBender::Commands::ClearCache.new.run global_options, options, args
   end
 end
 

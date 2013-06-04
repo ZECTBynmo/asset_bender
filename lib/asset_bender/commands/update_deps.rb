@@ -3,7 +3,7 @@ module AssetBender
     class UpdateDeps < BaseCommand
 
       def parse_options
-        setup_env
+        setup_command_env
 
         # Only update the projects passed in on the command line (if any).
         # Otherwise, update all the projects in the bender config

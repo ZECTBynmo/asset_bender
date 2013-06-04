@@ -18,7 +18,7 @@ module AssetBender
       end
 
       def run
-        setup_env({ :extra_projects => [@project_path] })
+        setup_command_env({ :extra_projects => [@project_path] })
         setup_sprockets
 
         # Clear out the output directory

@@ -1,24 +1,18 @@
 
 module AssetBender
   module Setup
-    # Sprockets config that is shared between the server and precompiling
 
-    def self.setup_sprockets
-      sprockets = Sprockets::Environment.new(AssetBender.root, { :must_include_parent => true })
+    def self.setup_env(options = {})
+      AssetBender::Config.mode = StringInquirer.new ENV['BENDER_ENV'] || options[:env] || "development"
+      print "\n", "Running in #{AssetBender::Config.mode} mode", "\n\n"
 
-      sprockets.cache = Sprockets::Cache::FileStore.new sprockets_cache_path
-      sprockets.logger.level = Logger::DEBUG
-
-      monkeypatch_directive_processors sprockets
-
-      sprockets    
+      setup_temp_path
     end
 
-    def self.sprockets_cache_path
+    def self.setup_temp_path
       if AssetBender::Config.temp_path
         temp_path = Pathname temp_path
       else
-        
         temp_path = Pathname File.expand_path('~/.bender-cache/')
       end
 
@@ -26,9 +20,29 @@ module AssetBender
         temp_path = Pathname("#{bender_root}/tmp/cache/").join temp_path
       end
 
-      environment = 'development'  # TODO change with mode
-      temp_path = temp_path.join 'assets', environment
-      temp_path.to_s
+      Config.temp_path = temp_path
+    end
+
+    # Sprockets config that is shared between the server and precompiling
+    def self.setup_sprockets(options = {})
+      sprockets = Sprockets::Environment.new(AssetBender.root, { :must_include_parent => true })
+
+      sprockets.cache = Sprockets::Cache::FileStore.new sprockets_cache_path
+      sprockets.logger.level = Logger::DEBUG
+
+      if Config.mode.compressed?
+        sprockets.js_compressor = :uglify
+        sprockets.css_compressor = :yui
+      end
+
+      monkeypatch_directive_processors sprockets
+
+      sprockets    
+    end
+
+    def self.sprockets_cache_path
+      cache_path = Config.temp_path.join 'assets', Config.mode
+      cache_path.to_s
     end
 
     def self.monkeypatch_directive_processors(sprockets)

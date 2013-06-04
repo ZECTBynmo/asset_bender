@@ -30,6 +30,7 @@ module AssetBender
     set :slim, :pretty => true
     set :views, File.join(project_root, 'views')
 
+    AssetBender::Setup.setup_env
     set :sprockets, AssetBender::Setup.setup_sprockets
     
     configure do
