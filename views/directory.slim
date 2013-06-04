@@ -5,7 +5,8 @@
         a href="/" ..
 
         - for part in directory.split_path do
-          a href="/#{part}/" = part
+
+          a href="/#{directory.path_up_to(part)}/" = part
 
   .dirs-n-files
     table

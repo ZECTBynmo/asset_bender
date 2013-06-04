@@ -28,7 +28,12 @@ module AssetBender
     end
 
     def split_path
-      @inner_path.split(File::SEPARATOR).reject {|t| t == ''}
+      @path_tokens ||= @inner_path.split(File::SEPARATOR).reject {|t| t == ''}
+    end
+
+    def path_up_to(part)
+      tokens = split_path
+      tokens[0..tokens.index(part)].join '/'
     end
 
     def check_forbidden
