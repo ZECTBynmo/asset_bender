@@ -131,8 +131,8 @@ module AssetBender
     end
 
     AssetRedirects = {
-      "/favicon.ico" => "/assets/favicon.png",
-      "/favicon.png" => "/assets/favicon.png",
+      "/favicon.ico" => "/assets/images/favicon.png",
+      "/favicon.png" => "/assets/images/favicon.png",
     }
 
     def redirect_asset_if_needed
