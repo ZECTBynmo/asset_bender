@@ -12,6 +12,9 @@ module AssetBender
       end
 
       def run
+        logger.warn "Clearing the cache..."
+        FileUtils.rm_r Config.temp_path
+
         local_archive = LocalArchive.new Config.archive_dir
 
         @projects_to_update.each do |project|
