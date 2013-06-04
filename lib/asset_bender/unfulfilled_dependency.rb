@@ -9,7 +9,7 @@ module AssetBender
     def initialize(name, resolved_version)
       @name = name
       @version = resolved_version
-      raise AssetBender::VersionError.new "Dependencies (even unfulfilled ones) should have fixed version numbers (version = #{@version}" if @version.is_wildcard?
+      raise AssetBender::VersionError.new "Dependencies (even unfulfilled ones) should have fixed version numbers (version = #{@version})" if @version.is_wildcard?
     end
 
     def to_s

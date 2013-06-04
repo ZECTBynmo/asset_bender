@@ -30,20 +30,22 @@ module AssetBender
     set :slim, :pretty => true
     set :views, File.join(project_root, 'views')
 
-    set :sprockets, Sprockets::Environment.new(root, { :must_include_parent => true })
+    set :sprockets, AssetBender::Setup.setup_sprockets
     
     configure do
+      # All of the images, css, etc that is used by asset bender UI
       internal_assets_path = File.join project_root, 'assets'
-      ProjectsManager.setup Config.local_projects + [internal_assets_path]
+
+      ProjectsManager.setup((Config.local_projects || []) + [internal_assets_path])
       DependenciesManager.setup Config.archive_dir
 
       ProjectsManager.available_projects.each do |project|
         sprockets.append_path project.path
       end
 
-      DependenciesManager.all_available_dependencies.each do |dep|
-        print "\n", "#{dep} path:  #{dep.path.inspect}", "\n\n"
-        sprockets.append_path dep.path
+      DependenciesManager.available_dependency_parent_paths.each do |path|
+        puts "dependency path:  #{path.inspect}"
+        sprockets.append_path path
       end
     end
 

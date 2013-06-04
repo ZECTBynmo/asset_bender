@@ -25,6 +25,8 @@ module AssetBender
   autoload :AbstractFilesystemProject,   "asset_bender/filesystem_project"
   autoload :LocalProject,                "asset_bender/local_project"
 
+  autoload :VersionMunger,               "asset_bender/version_munger"
+
   autoload :UnfulfilledDependency,       "asset_bender/unfulfilled_dependency"
   autoload :Dependency,                  "asset_bender/dependency"
   autoload :DependencyChain,             "asset_bender/dependency_chain"

@@ -6,10 +6,8 @@ module Sass
 
             alias_method :_orig_import, :import
             def import
-                if @imported_filename.include? '/static/'
-                    project_name = extract_project_from_path filename
-                    munge_build_names_for_dependencies project_name, @imported_filename
-                end
+                project = AssetBender::ProjectsManager.get_project_from_path filename
+                AssetBender::VersionMunger.munge_build_names_for_dependencies project, @imported_filename
 
                 _orig_import()
             end

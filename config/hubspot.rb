@@ -73,6 +73,7 @@ AssetBender::Config.project_config_fallback = lambda do |path|
   result = {
     :name => static_conf[:name],
     :version => convert_to_asset_bender_version(static_conf[:major_version] || "1"),
+    :legacy => true
   }
 
   if static_conf[:deps]
@@ -132,6 +133,20 @@ AssetBender::Config.archive_url_fallback = lambda do |dep|
   "http://#{archive_domain}/#{dep.name}-#{legacy_version}-src.tar.gz"
 end
 
+AssetBender::Config.dependency_path = lambda do |root_path, dependency_name, version|
+  print "\n", "version:  #{version.inspect}", "\n\n"
+
+  normal_path = File.join root_path, dependency_name.to_s, version.path_format
+  legacy_path = File.join root_path, dependency_name.to_s, version.to_legacy_hubspot_version
+
+  if Dir.exist? normal_path
+    normal_path
+  else
+    logger.info "Falling back to legacy depdency path: #{legacy_path}"
+    legacy_path
+  end
+end
+
 # Convert the pointers and directory name in old archives to the new format
 AssetBender::Config.modify_extracted_archive = lambda do |archive_path, dep, dep_pointers|
   dep_pointers.each do |pointer|
@@ -157,27 +172,18 @@ AssetBender::Config.modify_extracted_archive = lambda do |archive_path, dep, dep
       new_pointer_filename = pointer.sub 'latest-version-', 'latest-version-0.'
     end
 
-    # Delete the old pointer if it is going to be renamed
+    # Delete the old pointer if it needs a new name
     if not new_pointer_filename.nil? and new_pointer_filename != pointer
       File.delete existing_pointer_path
+
+      # Write the new one
+      new_pointer_filename ||= pointer
+      new_pointer_path = File.join(archive_path, dep.name, new_pointer_filename)
+
+      File.open new_pointer_path, 'w' do |f|
+        f.write "#{existing_pointer_content}\n"
+      end
     end
-
-    # Write the new one
-    new_pointer_filename ||= pointer
-    new_pointer_path = File.join(archive_path, dep.name, new_pointer_filename)
-
-    File.open new_pointer_path, 'w' do |f|
-      new_version_style = AssetBender::Version.new(existing_pointer_content).url_format
-      f.write "#{new_version_style}\n"
-    end
-  end
-
-  # Move the actual archive folder
-  legacy_version = dep.version.to_legacy_hubspot_version
-  legacy_location = File.join archive_path, dep.name, legacy_version
-
-  if Dir.exist? legacy_location
-    FileUtils.mv legacy_location, File.join(archive_path, dep.name, dep.version.url_format)
   end
 end
 
@@ -194,6 +200,20 @@ module AssetBender
 
       @semver.format AssetBender::Version::LEGACY_FORMAT_WITH_STATIC
     end
+
+  end
+end
+
+
+# Tweaks to the dependency class
+
+module AssetBender
+  class Dependency
+
+    def is_legacy?
+      @config[:legacy]
+    end
+
 
   end
 end

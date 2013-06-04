@@ -24,9 +24,11 @@ module AssetBender
     end
 
     def available_dependencies
-      available_dependency_paths.map do |path|
+      deps = available_dependency_paths.map do |path|
         File.basename path
       end
+
+      Set.new(deps).to_a
     end
 
     def available_dependency_paths
@@ -34,6 +36,14 @@ module AssetBender
         dir unless Dir[dir].empty?
       end.compact
     end
+
+    # Returns a set of all the dedpendency paths in the archive (that might house multiple versions)
+    def available_dependency_parent_paths
+      available_dependencies.map do |name|
+        File.join @path, name
+      end
+    end
+
 
     def is_valid_dependency?(dependency_name)
       available_dependencies.include? dependency_name
@@ -48,16 +58,23 @@ module AssetBender
     end
 
     def dependency_exists?(dependency_name, version)
-      dep_path = File.join @path, dependency_name.to_s, version.path_format
-      Dir.exist?(dep_path)
+      Dir.exist? get_dependency_path(dependency_name, version)
     end
 
     def get_dependency(dependency_name, version)
       begin
-        AssetBender::Dependency.load_from_file File.join @path, dependency_name.to_s, version.path_format
+        AssetBender::Dependency.load_from_file get_dependency_path(dependency_name, version)
       rescue AssetBender::ProjectLoadError => e
         logger.error e
         nil
+      end
+    end
+
+    def get_dependency_path(dependency_name, version)
+      if not AssetBender::Config.dependency_path.nil?
+        AssetBender::Config.dependency_path.call @path, dependency_name, version
+      else
+        File.join @path, dependency_name.to_s, version.path_format
       end
     end
 

@@ -34,6 +34,11 @@ module AssetBender
       @local_archive.available_dependencies
     end
 
+    # Returns a set of all the dedpendency paths in the archive (that might house multiple versions)
+    def available_dependency_parent_paths
+      @local_archive.available_dependency_parent_paths
+    end
+
     # Returns a hash of dependency names to an array of versions available
     def available_dependencies_and_versions
       @versions_for_each_dep ||= available_dependency_names.each_with_object({}) do |dep_name, result|
