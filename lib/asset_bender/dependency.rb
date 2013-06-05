@@ -20,6 +20,8 @@ module AssetBender
       false
     end
 
+    # Dependencies rely on fixed pre-resolved dependencies determined at
+    # build time instead of version pointers/wildcards
     def dependency_config
       fixed_dependencies = @config[:fixed_dependencies]
 
@@ -28,6 +30,18 @@ module AssetBender
       end
 
       fixed_dependencies
+    end
+
+    # The prefix to be removed when "munging" a non-versioned URL
+    # into a specific version of a dependency
+    def prefix_to_replace
+      "#{@name}/"
+    end
+
+    # The prefix inserted when "munging" a non-versioned URL into a 
+    # specific version of a dependency
+    def name_plus_version_prefix
+      "#{@name}/#{@version.url_format}/"
     end
 
   end

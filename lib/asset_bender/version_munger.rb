@@ -1,10 +1,11 @@
 module AssetBender
     class VersionMunger
+        extend AssetBender::VersionUtils
 
-        def self.peek_for_potential_strings_needing_munging(deps, data)
-            deps.each do |dep|
-                # Any paths for the passed in dependencies?
-                return true if data.include? "#{dep.name}/"
+        def self.peek_for_deps_that_potentially_need_munging(deps, data)
+            deps.select do |dep|
+                # Any potential paths for the passed in dependencies?
+                data.include? "#{dep.name}/"
             end
         end
 
@@ -16,14 +17,12 @@ module AssetBender
             end
 
             # Quick check to see if any munging is necessary (for performance)
-            return unless peek_for_potential_strings_needing_munging deps, data
+            deps = peek_for_deps_that_potentially_need_munging deps, data
+            return if deps.empty?
 
             deps.each do |dep|
-                if dep.is_legacy?
-                    data.gsub! "#{dep.name}/static/", "#{dep.name}/#{dep.version.to_legacy_hubspot_version}/"
-                else
-                    data.gsub! "#{dep.name}/", "#{dep.name}-#{dep.version.url_format}/"
-                end
+                path_prefix_for_dep = dep.name_plus_version_prefix
+                data.gsub!(/\b#{Regexp.escape(dep.prefix_to_replace)}/, path_prefix_for_dep)
             end
         end
     end
