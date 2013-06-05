@@ -21,6 +21,7 @@ module AssetBender
     end
 
     def parent_path
+      # Remove the project name from the full path
       File.split(@path)[0]
     end
 

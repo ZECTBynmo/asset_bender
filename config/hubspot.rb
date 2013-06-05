@@ -210,10 +210,37 @@ end
 module AssetBender
   class Dependency
 
+    # Keep track of which dependencies were loaded from
+    # "legacy" static_conf.json files
     def is_legacy?
       @config[:legacy]
     end
 
+    def url
+      if is_legacy?
+        "/#{@name}/#{@version.to_legacy_hubspot_version}/"
+      else
+        super
+      end
+    end
+
+    # Remove the static folder from legacy paths as well
+    def prefix_to_replace
+      if is_legacy?
+        "#{@name}/static/"
+      else
+        super
+      end
+    end
+
+    # Legacy paths still use "static-x.y" instead of semvers
+    def name_plus_version_prefix
+      if is_legacy?
+        "#{@name}/#{@version.to_legacy_hubspot_version}/"
+      else
+        super
+      end
+    end
 
   end
 end
