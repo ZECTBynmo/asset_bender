@@ -7,7 +7,7 @@ section.projects
   - for project in projects do
       div.project
         header
-          a href="/#{project.name}/"
+          a href="#{project.url}"
             h2.name = project.name
             span.version = project.recommended_version
 
@@ -16,16 +16,16 @@ section.projects
             - for dep in project.locally_resolved_dependencies
                 dt.name
                   - if dep.is_project
-                    a.project href="/#{dep.name}/" = dep.name
+                    a.project href="#{dep.url}" = dep.name
                   - else 
-                    a href="/#{dep.name}/" = dep.name
+                    a href="#{dep.url}" = dep.name
                 dd
                   span.requested.version = project.dependencies_by_name[dep.name.to_sym].abbrev
 
                   - if dep.is_dependency
                     span.resolved.version = dep.version.abbrev
 
-        a.path href="/#{project.name}/" = project.pretty_path
+        a.path href="#{project.url}" = project.pretty_path
 
         .meta
           .repoinfo == project.repo_info
@@ -52,7 +52,7 @@ section.dependencies
         ul.dependees
           - for project in dependencees_by_dep[dependency_name]
             li
-              a.source-project href="/#{project.name}" = project.name
+              a.source-project href="#{project.url}" = project.name
 
 
 

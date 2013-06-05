@@ -41,6 +41,11 @@ module AssetBender
         return @spec_directory = potential_spec_dir if File.directory? potential_spec_dir
       end
     end
+
+    def url
+      "/#{@name}/"
+    end
+
   end
 
 end

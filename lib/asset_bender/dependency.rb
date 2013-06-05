@@ -20,6 +20,11 @@ module AssetBender
       false
     end
 
+    def parent_path
+      # Remove the project name and version directory from the end of the path
+      File.split(File.split(@path)[0])[0]
+    end
+
     # Dependencies rely on fixed pre-resolved dependencies determined at
     # build time instead of version pointers/wildcards
     def dependency_config
@@ -30,6 +35,10 @@ module AssetBender
       end
 
       fixed_dependencies
+    end
+
+    def url
+      "/#{@name}/#{@version.url_format}/"
     end
 
     # The prefix to be removed when "munging" a non-versioned URL

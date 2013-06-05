@@ -14,5 +14,9 @@
         tr
           td class='name'
             a href="#{item[:url]}" = item[:name]
+
+            - if item[:raw_url]
+              a.raw href="#{item[:raw_url]}" raw
+
           td class='type' = item[:type]
           td class='mtime' = item[:mtime]

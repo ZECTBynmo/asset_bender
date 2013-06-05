@@ -14,7 +14,7 @@ GIT
 
 GIT
   remote: git://github.com/timmfin/sprocket-tribe.git
-  revision: 738c54d3aaec650fc886a1110646136805a6cb14
+  revision: bad6d512d653c94936919f778a6fe5b07ed98ec3
   branch: master
   specs:
     sprockets (2.9.3)
@@ -131,6 +131,7 @@ DEPENDENCIES
   hike!
   json (~> 1.7.7)
   rspec
+  ruby-prof
   sass (~> 3.2.5)
   semver-tribe!
   simplecov

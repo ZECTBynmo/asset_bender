@@ -10,10 +10,11 @@ module AssetBender
  
     F = ::File
 
-    def initialize(inner_path, project_or_dep)
+    def initialize(inner_path, project_or_dep, sprockets)
       @root_path = project_or_dep.parent_path
       @inner_path = inner_path
       @path = File.join @root_path, @inner_path
+      @sprockets = sprockets
 
       if true
         @project = project_or_dep
@@ -74,12 +75,18 @@ module AssetBender
           basename << '/'
         end
 
-        files << { 
+        file_hash = { 
           :url => url,
           :name => basename,
           :type => type,
           :mtime => mtime
         }
+
+        if not stat.directory? and @sprockets.attributes_for(node).processors.any?
+          file_hash[:raw_url] = "#{file_hash[:url]}?raw=1"
+        end
+
+        files << file_hash
       end
 
       files.sort do |x, y|

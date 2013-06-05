@@ -79,9 +79,10 @@ module AssetBender
       project_or_dependency = project_or_dependency_from_url
       change_to_aliased_path_of project if project_or_dependency.is_a?(AssetBender::LocalProject) && path_matches_name_not_alias_from(project_or_dependency)
 
-      directory = AssetBender::Directory.new get_path, project_or_dependency
+      directory = AssetBender::Directory.new get_path, project_or_dependency, Server.sprockets
 
-      if error = directory.check_forbidden or directory.check_directory_exists
+      if error = directory.check_forbidden || directory.check_directory_exists
+        logger.error error
         error
       else
         slim :directory, :locals => {
