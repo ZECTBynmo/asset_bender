@@ -27,6 +27,15 @@ module AssetBender
         logger.info "Starting assets pre-compile with #{@processes} processes"
         manifest = Sprockets::Manifest.new @sprockets.index, @output, @processes
 
+        profile = false
+
+        if profile
+            require 'ruby-prof'
+
+            # Profile the code
+            RubyProf.start
+        end
+
         # manifest.compile_prefixed_files_without_digest "#{@project_name}/"
 
         # Only include paths that start with the passed in prefix
@@ -47,6 +56,15 @@ module AssetBender
         puts paths.join("\n")
 
         manifest.compile paths
+
+        if profile
+            result = RubyProf.stop
+
+            # Print a flat profile to text
+            printer = RubyProf::FlatPrinter.new(result)
+            # printer = RubyProf::GraphPrinter.new(result)
+            printer.print(STDOUT)
+        end
 
       end
 
