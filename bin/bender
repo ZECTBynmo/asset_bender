@@ -23,20 +23,20 @@ require 'asset_bender/commands'
 
 include GLI::App
 program_desc 'Asset Bender'
- 
+
 flag [:m, :mode], :default_value => "development"
- 
+
 # pre do |global_options,command,options,args|
 #   $todo_list = Hacer::Todolist.new(global_options[:tasklist])
 # end
 
- 
+
 desc 'Run'
 long_desc "Starts the Asset Bender server in the foreground. Output is logged to the terminal"
 
 command :run do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Run.new.run global_options, options, args
+    AssetBender::Commands::Run.new(global_options, options, args).run
   end
 end
 
@@ -46,7 +46,7 @@ long_desc "Starts the Asset Bender server in the background. The output is logge
 
 command :start do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Start.new.run global_options, options, args
+    AssetBender::Commands::Start.new(global_options, options, args).run
   end
 end
 
@@ -56,7 +56,7 @@ long_desc "Stops the Asset Bender server, whether it currently in the foreground
 
 command :stop do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Stop.new.run global_options, options, args
+    AssetBender::Commands::Stop.new(global_options, options, args).run
   end
 end
 
@@ -66,7 +66,7 @@ long_desc "Stops and then starts the Asset Bender server in the background."
 
 command :restart do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::Restart.new.run global_options, options, args
+    AssetBender::Commands::Restart.new(global_options, options, args).run
   end
 end
 
@@ -76,7 +76,18 @@ long_desc "Clears the Asset Bender cache. You shouldn't need it, but it might he
 
 command :clear_cache do |c|
   c.action do |global_options, options, args|
-    AssetBender::Commands::ClearCache.new.run global_options, options, args
+    AssetBender::Commands::ClearCache.new(global_options, options, args).run
+  end
+end
+
+
+desc 'Install dependencies'
+long_desc 'Installes/updates the dependencies for the project in the current directory (or pass one or more paths).'
+
+command :install do |c|
+  c.action do |global_options, options, args|
+    bender_command = AssetBender::Commands::Install.new global_options, options, args
+    bender_command.run
   end
 end
 
@@ -87,7 +98,7 @@ long_desc 'Updates the dependencies for one more more projects. If no arguments 
 command :update_deps, 'update-deps' do |c|
   c.action do |global_options, options, args|
     bender_command = AssetBender::Commands::UpdateDeps.new global_options, options, args
-    bender_command.run 
+    bender_command.run
   end
 end
 
@@ -105,7 +116,7 @@ command :precompile do |c|
     help_now!('Must include output directory') unless options[:output]
 
     bender_command = AssetBender::Commands::Precompile.new global_options, options, args
-    bender_command.run 
+    bender_command.run
   end
 end
 

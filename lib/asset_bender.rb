@@ -18,6 +18,7 @@ module AssetBender
     File.expand_path(File.join(__FILE__, '../../'))
   end
 
+
   autoload :ProjectsManager,             "asset_bender/projects_manager"
   autoload :DependenciesManager,         "asset_bender/dependencies_manager"
   autoload :LocalArchive,                "asset_bender/local_archive"

@@ -8,6 +8,7 @@ module AssetBender
     autoload :Stop,                "asset_bender/commands/stop"
     autoload :Restart,             "asset_bender/commands/restart"
 
+    autoload :Install,             "asset_bender/commands/install"
     autoload :UpdateDeps,          "asset_bender/commands/update_deps"
 
     autoload :Precompile,          "asset_bender/commands/precompile"

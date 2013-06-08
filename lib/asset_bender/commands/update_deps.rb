@@ -12,8 +12,10 @@ module AssetBender
       end
 
       def run
+        abort "No projects to update" if @projects_to_update.empty?
+
         logger.warn "Clearing the cache..."
-        FileUtils.rm_r Config.temp_path
+        FileUtils.rm_r Config.temp_path if Dir.exist? Config.temp_path
 
         local_archive = LocalArchive.new Config.archive_dir
 
