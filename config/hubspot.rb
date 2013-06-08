@@ -2,7 +2,7 @@ AssetBender::Config.register_extendable_base_config('base_hubspot_settings', {
   :domain => "hubspot-static2cdn.s3.amazonaws.com",
   :cdn_domain => "static2cdn.hubspot.com",
 
-  :archive_dir => "~/.bender-archive/",
+  :archive_dir => "~/.bender/archive/",
   :archive_url_prefix => "archive",
 
   # :allow_projects_without_component_json => true,
@@ -50,7 +50,7 @@ def convert_to_asset_bender_version(version_string)
 end
 
 def convert_to_legacy_version(version)
-  version.format AssetBender::Version::LEGACY_FORMAT_WITH_STATIC 
+  version.format AssetBender::Version::LEGACY_FORMAT_WITH_STATIC
 end
 
 AssetBender::Config.project_config_fallback = lambda do |path|
@@ -78,7 +78,7 @@ AssetBender::Config.project_config_fallback = lambda do |path|
 
   if static_conf[:deps]
     result[:dependencies] = {}
-    static_conf[:deps].each_with_object(result[:dependencies]) do |(dep, version), deps| 
+    static_conf[:deps].each_with_object(result[:dependencies]) do |(dep, version), deps|
       deps[dep] = convert_to_asset_bender_version version
     end
   end
@@ -94,7 +94,7 @@ AssetBender::Config.project_config_fallback = lambda do |path|
 
   # If this is a prebuilt src archive or prebuilt_recursive_static_conf.json
   if prebuilt_static_conf
-    # Move all prebuilt deps to fixed_dependencies 
+    # Move all prebuilt deps to fixed_dependencies
     result[:fixed_dependencies] = prebuilt_static_conf[:deps]
   end
 
@@ -113,8 +113,8 @@ AssetBender::Config.url_for_build_pointer_fallback = lambda do |project_name, ve
   end
 
   if version_pointer != 'edge' && !func_options[:force_production] && fetcher.options[:environment] != :production
-    version_pointer += "-qa" 
-  end 
+    version_pointer += "-qa"
+  end
 
 
   if fetcher.domain.start_with? "file://"

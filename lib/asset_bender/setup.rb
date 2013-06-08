@@ -13,7 +13,7 @@ module AssetBender
       if AssetBender::Config.temp_path
         temp_path = Pathname temp_path
       else
-        temp_path = Pathname File.expand_path('~/.bender-cache/')
+        temp_path = Pathname File.expand_path('~/.bender/cache/')
       end
 
       if temp_path.relative?
@@ -37,7 +37,7 @@ module AssetBender
 
       monkeypatch_directive_processors sprockets
 
-      sprockets    
+      sprockets
     end
 
     def self.sprockets_cache_path

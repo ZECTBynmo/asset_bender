@@ -12,7 +12,7 @@ AssetBender::Config.register_extendable_base_config('test_base', {
 })
 
 AssetBender::Config.register_extendable_base_config 'test_base2' do
-  { 
+  {
     :another_base_setting => "some other setting"
   }
 end
@@ -21,7 +21,7 @@ end
 describe AB::Config do
 
   it 'should default to loading from the home directory' do
-    AB::Config.filename.should eq(File.expand_path "~/.bender.yaml")
+    AB::Config.filename.should eq(File.expand_path "~/.bender/config.yaml")
   end
 
   it 'should load from a yaml file' do
@@ -59,18 +59,18 @@ describe AB::Config do
 
   it 'can be exported as a hash' do
     config = AB::Config.load fixture_path "example-bender.yaml"
-    
+
     config.to_hash.should eq(AB::Config::DEFAULT_CONFIG.merge({
-      :base_setting=>"some setting", 
-      :shared_setting=>10, 
+      :base_setting=>"some setting",
+      :shared_setting=>10,
       :a_shared_hash=>{
         :of=>{
-          :yet_more_stuff=>"that is still awesome", 
+          :yet_more_stuff=>"that is still awesome",
           :other_stuff=>"that is awesome"
-        }, 
+        },
         :and_more=>42
-      }, 
-      :my_setting=>"funtown", 
+      },
+      :my_setting=>"funtown",
       :a_hash=>{
         :of=>{
           :stuff=>"that is awesome"
@@ -99,5 +99,5 @@ describe AB::Config do
     expect { AB::Config.dup }.to raise_error
     expect { AB::Config.clone }.to raise_error
   end
- 
+
 end

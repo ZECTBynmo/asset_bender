@@ -3,7 +3,7 @@ require 'bundler/setup'
 require 'asset_bender'
 require 'spec_helper'
 
-# Don't load the ~/.bender.yaml while testing
+# Don't load the ~/.bender/config.yaml while testing
 AssetBender::Config.skip_global_config = true
 
 

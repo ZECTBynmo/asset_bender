@@ -4,8 +4,8 @@ module AssetBender
 
   class Config
 
-    FILENAME = ".bender.yaml"
-    PATH = "~/"
+    FILENAME = "config.yaml"
+    PATH = "~/.bender/"
 
     @skip_global_config = false
     class << self
@@ -51,7 +51,7 @@ module AssetBender
 
       # Only autocreate the config file if we are using the default one
       # (e.g. they didn't manually specify where the config file lives)
-      create_if_doesnt_exist = filename_to_load.nil?  
+      create_if_doesnt_exist = filename_to_load.nil?
 
       filename_to_load ||= filename
 
@@ -89,7 +89,7 @@ module AssetBender
         when String then [extends]
         when Enumerable then extends
         else []
-      end 
+      end
     end
 
     # Get's the data for a parent config. It first looks to see if the passed name
@@ -106,7 +106,7 @@ module AssetBender
         else
           parent_config
         end
-      else 
+      else
         logger.warn "No such #{name_or_file} base config, looking for it on the filesystem"
         load_json_or_yaml_file File.expand_path name_or_file
       end
@@ -115,7 +115,7 @@ module AssetBender
     # Register a base config that other config files can extend.
     #
     #    Config.register_extendable_base_config('mycompany', hash_of_defaults)
-    # 
+    #
     #    OR
     #
     #    Config.register_extendable_base_config 'mycompany', do
