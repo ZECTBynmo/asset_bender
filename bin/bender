@@ -1,11 +1,19 @@
 #! /usr/bin/env ruby
 
+# Make bundler happy (make the cwd where the Gemfile is)
+cwd = Dir.pwd
+Dir.chdir File.expand_path('../..', __FILE__)
+
 require 'bundler/setup'
 require 'gli'
 require 'sprockets'
 require 'compass'
 require 'sprockets-sass'
 require 'sprockets-helpers'
+
+# Move back to the directory we started in so all other code
+# gets the correct `Dir.pwd`
+Dir.chdir cwd
 
 bender_path = File.expand_path(File.join(File.dirname(__FILE__), '../lib/'))
 $LOAD_PATH.unshift(bender_path) unless $LOAD_PATH.include?(bender_path)
