@@ -31,10 +31,10 @@ flag [:m, :mode], :default_value => "development"
 # end
 
 
-desc 'Run'
+desc 'Serve'
 long_desc "Starts the Asset Bender server in the foreground. Output is logged to the terminal"
 
-command :run do |c|
+command :serve do |c|
   c.action do |global_options, options, args|
     AssetBender::Commands::Run.new(global_options, options, args).run
   end
