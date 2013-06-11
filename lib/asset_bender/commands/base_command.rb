@@ -16,7 +16,7 @@ module AssetBender
       end
 
       def bender_root
-        File.expand_path(File.join(__FILE__, '../../'))
+        File.expand_path(File.join(__FILE__, '../../../'))
       end
 
       def setup_command_env(env_options = {})
