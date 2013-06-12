@@ -14,7 +14,8 @@ require 'slim'
 require 'set'
 
 require 'asset_bender'
-require "asset_bender/patches/alias_sprocket_helpers"
+require 'asset_bender/patches/alias_sprocket_helpers'
+require 'asset_bender/patches/fix_rack_livereload_with_cached_html'
 
 
 
