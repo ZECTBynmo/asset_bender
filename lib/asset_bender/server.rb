@@ -1,6 +1,7 @@
 require 'bundler/setup'
 
 require 'sinatra/base'
+require 'sinatra/sprockets-helpers'
 
 require 'sprockets'
 require 'sprockets-sass'
@@ -13,6 +14,8 @@ require 'slim'
 require 'set'
 
 require 'asset_bender'
+require "asset_bender/patches/alias_sprocket_helpers"
+
 
 
 Compass.configuration do |compass|
@@ -23,6 +26,7 @@ AssetBender::Config.load_all_base_config_files
 
 module AssetBender
   class Server < Sinatra::Base
+    register Sinatra::Sprockets::Helpers
 
     project_root = File.join settings.root, '../../'
     enable :logging
@@ -32,7 +36,7 @@ module AssetBender
 
     AssetBender::Setup.setup_env
     set :sprockets, AssetBender::Setup.setup_sprockets
-    
+
     configure do
       # All of the images, css, etc that is used by asset bender UI
       internal_assets_path = File.join project_root, 'assets'
@@ -48,6 +52,32 @@ module AssetBender
         puts "dependency path:  #{path.inspect}"
         sprockets.append_path path
       end
+
+      configure_sprockets_helpers do |config|
+        config.environment = sprockets
+        config.prefix      = ""
+        config.public_path = nil
+
+        # Force to debug mode in development mode
+        config.debug = Config.mode.development?
+        config.asset_host = Config.static_domain unless Config.static_domain.nil?
+      end
+
+      # Helpers in ERB templates processed via sprockets
+      sprockets.context_class.instance_eval do
+        include AssetBender::TemplateHelpers
+      end
+    end
+
+    helpers do
+      include Sprockets::Helpers
+
+    end
+
+    if Config.livereload
+      logger.info "Turning on rack-livereload"
+      require 'rack-livereload'
+      use Rack::LiveReload
     end
 
     # error do
@@ -137,7 +167,7 @@ module AssetBender
     }
 
     def redirect_asset_if_needed
-      path = get_path 
+      path = get_path
       env['PATH_INFO'] = AssetRedirects[path] if AssetRedirects[path]
     end
   end

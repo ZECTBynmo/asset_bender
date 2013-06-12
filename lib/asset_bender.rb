@@ -38,7 +38,8 @@ module AssetBender
   autoload :LocalFetcher,                "asset_bender/local_fetcher"
   autoload :Directory,                   "asset_bender/directory"
 
+  autoload :TemplateHelpers,             "asset_bender/template_helpers"
+
   autoload :Config,                      "asset_bender/config"
   autoload :Setup,                       "asset_bender/setup"
-
 end

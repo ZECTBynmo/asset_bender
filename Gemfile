@@ -31,6 +31,12 @@ gem 'semver-tribe', :github => 'timmfin/semver', :branch => 'master'
 
 gem 'json', '~> 1.7.7'
 
+# gem "guard", "~> 1.8.0"
+gem 'guard', :github => 'timmfin/guard', :branch => 'watch-multiple-directories'
+gem "guard-livereload", "~> 1.4.0"
+gem "rack-livereload", "~> 0.3.15"
+gem "guard-rack"
+
 
 group :development do
   gem 'ruby-prof'
