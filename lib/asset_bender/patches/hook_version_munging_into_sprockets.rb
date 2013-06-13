@@ -30,4 +30,3 @@ module Sprockets
         alias_method :initialize, :wrapped_initialize
     end
 end
-
