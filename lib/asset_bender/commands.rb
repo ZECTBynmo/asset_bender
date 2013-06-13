@@ -2,6 +2,7 @@ module AssetBender
   module Commands
 
     autoload :BaseCommand,         "asset_bender/commands/base_command"
+    autoload :GuardCommand,        "asset_bender/commands/guard_command"
 
     autoload :Serve,               "asset_bender/commands/serve"
     autoload :Start,               "asset_bender/commands/start"
