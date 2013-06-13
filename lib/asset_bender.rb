@@ -3,7 +3,7 @@ require "flexible_config"
 require "string_inquirer"
 
 module AssetBender
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   class Error < StandardError; end
 
