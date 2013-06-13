@@ -43,6 +43,14 @@ GIT
     sprockets-derailleur (0.0.6)
       sprockets (~> 2)
 
+GIT
+  remote: git://github.com/timmfin/sprockets-helpers.git
+  revision: 72bcecb0f879695624e9366c7ebb6ecafacfcea9
+  branch: master
+  specs:
+    sprockets-helpers (1.0.0)
+      sprockets (~> 2.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -150,8 +158,6 @@ GEM
     slop (3.4.5)
     spoon (0.0.4)
       ffi
-    sprockets-helpers (1.0.1)
-      sprockets (~> 2.0)
     sprockets-sass (1.0.1)
       sprockets (~> 2.0)
       tilt (~> 1.1)
@@ -200,7 +206,7 @@ DEPENDENCIES
   slim
   sprockets!
   sprockets-derailleur!
-  sprockets-helpers
+  sprockets-helpers!
   sprockets-sass
   thin
   uglifier (>= 2.1.0)

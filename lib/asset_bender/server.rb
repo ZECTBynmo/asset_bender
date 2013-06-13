@@ -50,7 +50,6 @@ module AssetBender
       end
 
       DependenciesManager.available_dependency_parent_paths.each do |path|
-        puts "dependency path:  #{path.inspect}"
         sprockets.append_path path
       end
 
@@ -59,15 +58,19 @@ module AssetBender
         config.prefix      = ""
         config.public_path = nil
 
-        # Force to debug mode in development mode
-        config.debug = Config.mode.development?
+        # Force to debug mode in development mode, but don't
+        # use the :debug settings because that will overwrite asset_host
+        config.expand = Config.mode.development?
+        config.manifest = config.digest = !Config.mode.development?
         config.asset_host = Config.static_domain unless Config.static_domain.nil?
+        config.protocol = :relative
       end
 
       # Helpers in ERB templates processed via sprockets
       sprockets.context_class.instance_eval do
         include AssetBender::TemplateHelpers
       end
+
     end
 
     helpers do
@@ -170,6 +173,24 @@ module AssetBender
     def redirect_asset_if_needed
       path = get_path
       env['PATH_INFO'] = AssetRedirects[path] if AssetRedirects[path]
+    end
+
+    InternalAssetsToMaxAge = [
+      "/assets/images/favicon.png",
+      "/assets/images/favicon@2x.png",
+    ]
+
+    after do
+      header_tweaks
+    end
+
+    def header_tweaks
+      return unless response.headers
+
+      # Add some max age caching to the favicons so they don't show up in the logs as much
+      if InternalAssetsToMaxAge.include? env["PATH_INFO"]
+        response.headers['Cache-control'] = "max-age=3600"
+      end
     end
   end
 end

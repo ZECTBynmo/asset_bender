@@ -23,6 +23,9 @@ module AssetBender
       :build_hash_filename => "premunged-static-contents-hash.md5",
       :denormalized_dependencies_filename => "denormalized-deps.json",
       :info_filename => "info.txt",
+
+      :static_domain => "",
+      :prefixed_static_domain => "",
     }
 
     # Load the global config singleton that will be avialble as:
